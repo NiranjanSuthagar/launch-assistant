@@ -1,0 +1,5 @@
+Uncaught ReferenceError: isUserAuthenticated is not defined
+    at checkUserAccess (src/utils/auth.js:27:12)
+    at onClick (src/components/NavBar.js:56:18)
+    at HTMLButtonElement.dispatch (node_modules/jquery/dist/jquery.js:5423:27)
+    at HTMLButtonElement.elemData.handle (node_modules/jquery/dist/jquery.js:5237:28)
