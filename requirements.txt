@@ -1,4 +1,4 @@
-# re
+python-dotenv
 requests
 ollama
-# json
+groq

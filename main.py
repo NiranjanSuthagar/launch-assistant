@@ -1,7 +1,6 @@
 from util import read_log_file,extract_file,classify_error,get_solution
 from llm import get_suggestion
 
-
 def test():
     try:
         while True:
