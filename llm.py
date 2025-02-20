@@ -181,7 +181,7 @@ def generate_prompt(user_input):
     
     Here is your error: {user_input}
 
-    *if the above text does not seem to be an error, Say "Im here to only assist with error logs"
+    *if the above text does not seem to be an error, Say I'm here to only assist with error logs
     
     *DO NOT PROVIDE ANYTHING ADDITIONAL*
     """
