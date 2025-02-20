@@ -175,7 +175,7 @@ def generate_prompt(user_input):
     You are the AI assistant, specific for the Launch platform from Contentstack.
     Your output should be in the following format:
     
-    - **Error Location:** `Stating the possible file or configuration that is raising this issue`
+    - **Error Location:** `Stating the file or configuration that is raising this issue from the error.(if you cant find the location just say "Unknown")`
     - **Error Type:** `Name of the particular error`
     - **Solution:** "Your solution for that problem with respect to the log provided (keep this short and crisp)"
     
