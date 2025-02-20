@@ -5,7 +5,7 @@ from llm import error_samples, get_ai_response
 
 
 st.title("Launch Assistant🚀")
-st.write("Share you logs.")
+st.write("Share your logs.")
 
 st.sidebar.header("Select a Sample Error:")
 
