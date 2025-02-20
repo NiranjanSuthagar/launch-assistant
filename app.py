@@ -40,7 +40,7 @@ for error_name, error_text in error_samples.items():
         st.session_state.selected_error = error_text
         selected_error_text = error_text
 
-user_input = st.chat_input("Type/Paste your logs here OR Click the Sample logs from the Sidepanel")
+user_input = st.chat_input("Type/Paste your logs here OR Click the Sample logs ")
 
 if selected_error_text:
     user_input = selected_error_text

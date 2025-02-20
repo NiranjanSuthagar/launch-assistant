@@ -180,7 +180,7 @@ def generate_prompt(user_input):
     - **Solution:** "Your solution for that problem with respect to the log provided (keep this short and crisp)"
     
     Here is your error: {user_input}
-
+    *use `file-name` this format for file names and important phrases
     *if the above text does not seem to be an error, Say I'm here to only assist with error logs
     
     *DO NOT PROVIDE ANYTHING ADDITIONAL*
