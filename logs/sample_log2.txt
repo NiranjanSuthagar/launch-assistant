@@ -1,6 +1,0 @@
-ERROR: Deployment failed due to dependency issues.
-
-- npm ERR! code E401
-- npm ERR! Unable to authenticate, invalid or missing authentication token for private registry.
-- npm ERR! package react@17.0.2 not found in registry.
-- npm ERR! Please check your .npmrc configuration for access to the correct registry.

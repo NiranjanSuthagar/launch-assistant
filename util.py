@@ -1,29 +1,27 @@
 import re
 
 error_patterns = {
-    r"401 Unauthorized|Authentication failed for package '@[\w-]+'|Unable to authenticate, invalid or missing authentication token": "Private Package Authentication Failure",
-    r"npm error code E401|npm error Incorrect or missing password|npm error authentication token": "Private Package Authentication Failure",
-    r"ERR! 404 Not Found|No matching version found for '([\w-]+)@([\d.x-]+)'|package ([\w-]+)@([\d.x-]+) not found in registry": "Unresolved Dependency",
-    r"Conflicting dependencies found:[\s\S]*requires ([\w@.-]+) but ([\w@.-]+) is installed": "Dependency Version Conflict",
-    r"npm ERR! Missing script: 'build'": "Incorrect Build Command Configuration",
-    r"npm error Missing script: \"[\w-]+\"": "Incorrect Build Command Configuration",
-    r"No build command configured, skipping dependency installation and build steps": "No Build Command Configured",
-    r"Error: Missing required environment variable ([A-Z_]+)|Failed to load environment variables|is undefined": "Incorrect Environment Variables Configuration",
-    r"destination of (rewrite|redirect) exceeds character limit of 512 characters": "Destination Exceeds Character Limit",
-    r"launch.json error: length must be <= 512, but got \d+ at /rewrites/\d+/destination": "Destination Exceeds Character Limit",
+    r"401 Unauthorized|Authentication failed|Unable to authenticate": "Private Package Authentication Failure",
+    r"npm error code E401|Incorrect or missing password|authentication token error": "Private Package Authentication Failure",
+    r"ERR! 404 Not Found|No matching version found for '[\w@.-]+@\d[\w.-]*'|package '[\w@.-]+@\d[\w.-]*' not found": "Unresolved Dependency",
+    r"Conflicting dependencies found:[\s\S]*requires [\w@.-]+ but [\w@.-]+ is installed": "Dependency Version Conflict",
+    r"npm ERR! Missing script: '[\w-]+'": "Incorrect Build Command Configuration",
+    r"No build command configured|Skipping dependency installation and build steps": "No Build Command Configured",
+    r"Missing required environment variable [A-Z_]+|Failed to load environment variables|environment variable .* is undefined": "Incorrect Environment Variables Configuration",
+    r"destination of (rewrite|redirect) exceeds \d+ characters": "Destination Exceeds Character Limit",
+    r"launch.json error: length must be <= \d+, but got \d+ at /rewrites/\d+/destination": "Destination Exceeds Character Limit",
     r"(rewrite|redirect) has no destination": "No Destination for Rewrite/Redirect",
     r"launch.json error: missing properties: 'destination' at /rewrites/\d+": "No Destination for Rewrite/Redirect",
-    r"invalid regex in (rewrite|redirect)": "Invalid Regex in Rewrite/Redirect",
-    r"launch.json error: rewrites has invalid Destination pattern": "Invalid Regex in Rewrite/Redirect",
+    r"invalid regex in (rewrite|redirect)|rewrites has invalid Destination pattern": "Invalid Regex in Rewrite/Redirect",
     r"Edge functions deployment error": "Edge Function Deployment Error",
     r"Error while deleting user edge function": "Edge Function Deletion Error",
-    r"Cloud function deployment failed|Unable to connect to the database during deployment": "Cloud Function Deployment Error",
+    r"Cloud function deployment failed|Unable to connect to .* during deployment": "Cloud Function Deployment Error",
     r"Cloud functions deployment error": "Cloud Function Deployment Error",
-    r"Deployment failed during site setup": "Site Setup Deployment Failure",
-    r"Deployment failed while setting up the site": "Site Setup Deployment Failure",
-    r"SyntaxError: (.+) at (.+):(\d+):(\d+)": "Syntax Error",
+    r"Deployment failed .* site setup": "Site Setup Deployment Failure",
+    r"SyntaxError: .* at .*:\d+:\d+": "Syntax Error",
     r"TypeError|ReferenceError|Uncaught Exception": "Runtime Error",
 }
+
 
 error_solutions = {
     "Private Package Authentication Failure": "Check your .npmrc file for the correct authentication token or login using 'npm login'. Ensure you have the necessary permissions to access the private package.",
