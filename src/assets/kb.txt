@@ -1,0 +1,3815 @@
+**Knowledge Base for Launch Assistant**
+
+Dependency Installation Issues
+1. Private Package Authentication Failure
+Error Message: Incorrect or missing password
+Possible Causes:
+The user entered incorrect npm credentials.
+The user forgot the password.
+The .npmrc file is missing, which is required for installing private packages.
+Solution:
+Update or reset your npm credentials using npm login.
+Ensure you are using the correct password.
+If you forgot your password, recover it at npmjs.com/forgot.
+Check if the .npmrc file is correctly configured for authentication.
+
+Cloud Function Deployment Failures
+Error Message: Cloud function deployment failed.
+Possible Causes:
+Issue in the user's code that prevents successful deployment.
+Infrastructure-related issues at Contentstack's end (rare but possible).
+Solution:
+Use Contentstack CLI to run cloud functions locally and debug errors before deployment.
+Consult the Contentstack Cloud Functions documentation for troubleshooting steps.
+If the issue persists, contact Contentstack Support for assistance.
+
+Edge Function Deployment Failures
+Error Message: Edge function deployment failed.
+Possible Causes:
+Errors in the edge function code.
+Compatibility issues with WinterCG.
+Build size exceeding 1MB.
+Solution:
+Consult the Launch Edge Functions documentation for troubleshooting steps.
+If the issue persists, contact Contentstack Support for assistance.
+Important Note: The deployment failure is not related to the user's network connection, as deployments run in an isolated container in Contentstack's infrastructure. If the user has network issues, they may experience slow log retrieval or delayed UI loading, but it will not cause deployment failures.
+
+Site Setup Deployment Failures
+Error Message: Site deployment failed during setup.
+Possible Causes:
+Internal issue in Contentstack's Launch infrastructure.
+Solution:
+Retry the deployment.
+If the issue persists, contact Contentstack Support.
+Note: Users do not need to check site settings, deployment configurations, or stack configurations, as the failure is likely not caused by them.
+General Notes & Corrections
+Removed the example related to edge function deletion errors, as users will not see such errors in the logs.
+Adjusted the cloud function error descriptions to reflect that users do not need to provide credentials or manage infrastructure permissions.
+For edge functions, CLI support is not available, so users cannot debug them locally via CLI.
+For cloud functions, users can debug locally using the CLI before deploying.
+
+**General knowlegde base about contentstack**
+
+Question: What is Access Token removal?
+Answer: We have stopped supporting Access Tokens for stacks created after December 16, 2020. This means stacks created after this date will not have Access Tokens. You need to use
+Delivery Tokens
+for making authorized
+Content Delivery API
+requests and use
+Management Token
+or
+Authtoken
+for
+Content Management API
+requests.
+Note
+: You need to pass the value of Delivery Token against the ‘
+access_token
+’ key to make authorized Content Delivery API requests.
+
+Question: What tokens should I use instead of the Access Token?
+Answer: Use
+Delivery Tokens
+to fetch environment-specific published content (assets and entries).
+Use
+Management Tokens
+to fetch unpublished or draft content (assets or entries). You can also use them in Content Management API requests to perform PUT, POST, and DELETE operations.
+
+Question: Does Access Token deprecation affect all stacks?
+Answer: No. Only the stacks created after December 16, 2020 won't support access tokens. Existing stacks, i.e., stacks created before December 16, 2020 will continue to support access tokens. However, we strongly recommend using
+management tokens
+and
+delivery tokens
+instead.
+
+Question: Can I view unpublished or draft content without the Access Token?
+Answer: Yes. You can use the
+Management Tokens
+or user
+Authtoken
+to view/fetch unpublished or draft content.
+
+Question: Can you provide an example of what works today and what will not work after ending support for an access token?
+Answer: If you have a request similar to the following example:
+curl -X GET \
+'https://api.contentstack.io/v3/content_types/123/entries/blt15c55f3a4832aecf?include_publish_details=true&include_workflow=true' \
+  -H 'accept-encoding: application/json' \
+  -H 'access_token: blt83dc39df2c313508' \
+  -H 'api_key: blt4f22b9b7b5c131b0'
+It will not work for stacks created after December 16, 2020. To make it work, the request should use the value of a delivery token against the ‘
+access_token
+’ key.
+
+Question: What steps do you need to take to replace Access Tokens with Delivery or Management Tokens?
+Answer: Delivery Tokens for Access Tokens
+You can
+create a Delivery Token
+for each publishing environment.
+If you have used an Access Token for fetching published content, we recommend using Delivery Token against the
+access_token
+header parameter in your Content Delivery API requests.
+Management Tokens for Access Tokens
+You can
+create a Management Token
+or request the stack owner/admin to create a Management Token to authorize any stack-level read or write operations.
+If you have used an Access Token for fetching unpublished or draft content, we recommend using the value of the Management Token against the
+authorization
+header parameter in your Content Management API requests.
+
+Question: How can I replace the Access Token in my script?
+Answer: Delivery Tokens
+In your Content Delivery API requests, you need to use the value of the Delivery Token against the
+access_token
+header parameter.
+Management Tokens
+In your Content Management API requests, instead of the
+access_token
+header parameter, use the
+authorization
+parameter and pass the value of your Management Token against it.
+Here’s a sample cURL for reference:
+curl -X GET 'https://api.contentstack.io/v3/content_types/{ContentTypeUid}/entries/{EntryUid}' \
+  -H 'access_token: blt83dc39df2c313508' \
+  -H 'authorization: XXXXXXXXXXXXXXXX' \
+  -H 'api_key: blt1f23b4c5d6e789f0'
+
+Question: Is there any way I can log when the last stack Access Token was used? This will help understand whether I’m still using Access Token anywhere.
+Answer: No such log is maintained by Contentstack. So you need to ensure at your end that you create delivery and management tokens and replace access tokens with them at all instances as suggested above.
+
+Question: Why am I still seeing the access_token key in the header after deprecation?
+Answer: We have not removed the
+access_token
+key from the headers. The key is still available in the header since we support Access Token for older stacks. For newer stacks, you need to use the value of Delivery Token against the ‘
+access_token
+’ key.
+
+Question: Is there a quick reference guide to know about the tokens used in Contentstack?
+Answer: We have a comprehensive listing of all tokens used for content delivery and management in Contentstack. Please refer to
+Types of Tokens
+guide for details and learn more about them.
+
+Question: Can I use the value of the Management Token against the access_token parameter?
+Answer: No. You can use only the value of the Delivery Token against the
+access_token
+key for Content Delivery API requests.
+For Content Management API (CMA) requests, you can use the value of the Management Token against the
+authorization
+parameter. Alternatively, you can use the
+authtoken
+parameter for CMA requests. Learn about the
+different types of tokens
+and their usage.
+The following screenshot shows how you use the
+authtoken
+or
+authorization
+header parameters while running API requests through the Postman application:
+
+Question: Do you have any recommendation on the number of includes (and levels) for "Get Entry/Entries" calls
+Answer: When trying out Contentstack
+Get a single entry
+or
+Get all entries
+API requests, Contentstack recommends certain optimization measures that will help you achieve fair limits on your API usage.
+Here are some important points that you need to consider:
+Limit Response Payload
+: GET calls usually return a lot of unwanted parameters. If the APIs are used excessively, the default API response not only increases infrastructure load but also starts impacting the performance of your app. It's important to validate data and filter out anything that shouldn't be there.
+Ideally, the best practice is to limit your response payload to
+5 MB
+.
+Keep the total number of “includes” and “level depth” to the minimum
+: When retrieving data, always make sure you decide logically what you need to extract and avoid retrieving unnecessarily large data.
+It is recommended to keep the number of includes (when referencing other entries) and the depth levels as low as possible. The best practice is to restrict your total include to
+not exceed 10
+. However it depends on the user’s requirement (and their final response payload size, which should be restricted to the ideal response size mentioned above).
+Make use of projection queries
+: To restrict the size returned in your response payload, make sure to use projection queries such as
+only
+,
+except
+, etc. These projection queries allow you to retrieve/exclude specific field data for each entry.
+Make use of pagination
+: If you think that your response payload can be overwhelming, you can use
+skip
+and
+limit
+parameters to paginate your response.
+Use “Lazy loading”
+: This factor totally depends on the user and also on the framework that they use. If the website data is pulled in from multiple content types, lazy loading is a good approach that will let them load the important sections of their website first before loading the others.
+Exceptional Use Case
+So what do you do if you might hit the limits even after following the above precautionary measures?
+In this scenario, you can make use of
+filtering or pagination
+. What does this mean? Let’s look at the steps involved:
+First, you can divide your includes into multiple calls, say you need to add 10 includes. You can split them into groups of, maybe, two.
+You can append projection queries such as
+only
+,
+except
+, etc. to these batches to retrieve restricted response.
+[Optional, but recommended]
+Now, if you feel your response can be overwhelming, you can use
+skip
+and
+limit
+parameters to paginate your response.
+Finally, you can merge the results of all the batches together to get your final response.
+
+Question: Is the “Publish Later” option supported in the write API?
+Answer: Yes, the “Publish Later” option is supported in REST API calls as well. When passing the publish entry details in the body parameter of the
+Publish an Entry
+POST call, you need to provide the “scheduled_at” key with the publishing date/time in the ISO format as its value.
+The body parameter should look like this:
+{
+"entry": {
+"locales": [
+...
+],
+"environments": [
+...
+]
+},
+"locale": "en-us",
+"version": 1,
+"scheduled_at": "2016-10-07T12:34:36.000Z"
+}
+
+Question: I uploaded an image to Contentstack. However, when I download the same image from Contentstack, why does the size of the downloaded image exceed the size of the original image?
+Answer: By default, Contentstack's
+Image Delivery API
+optimizes the JPEG or WebP images by 85%. When you use optimization on images, it tends to increase the size of the original image. However, it reduces overall bandwidth over multiple images delivered from the API. So, a few images that were available in lower sizes are delivered in larger sizes when retrieved through the API.
+
+Question: Is there any API that lets me automate some release postings?
+Answer: Yes, Contentstack gives you the provision to automate release postings via  “POST” calls. You can schedule the entry to be published at a later date/time by adding the “scheduled_at” key in the Body parameter. When passing the publish entry details in the Body parameter of the POST call, you need to provide the publishing date/time in the ISO format as the value of the “scheduled_at” key. The Body parameter should look like this:
+{
+    "entry": {
+        "locales": [
+           ...
+        ],
+        "environments": [
+            ...
+        ]
+    },
+    "locale": "en-us",
+    "version": 1,
+    "scheduled_at": "2016-10-07T12:34:36.000Z"
+}
+
+Question: Do you have an open API?
+Answer: Yes, we have open APIs for
+Content Delivery
+and
+Content Management
+.
+Content Delivery API helps you to retrieve data and Content Management API allows you to create, access, and manage data.
+
+Question: Does Contentstack use any CDN for content delivery?
+Answer: Yes, Contentstack uses Fastly, a leading Content Delivery Network (CDN) provider, to provide lightning-fast content delivery to users anywhere in the world. Learn more about
+CDN
+.
+
+Question: Using the API, I want to get only a few fields of entries and not all fields of the entries. Is it possible to achieve this?
+Answer: Yes, this is possible. You need to execute the “only[BASE][]” query and provide the unique IDs of only those fields that you wish to retrieve, as its parameters. For more details, refer to the
+Only Operator
+section in our Content Delivery API.
+
+Question: For Image Delivery APIs - What does the Image Delivery API do?
+Answer: Image Delivery APIs
+are image manipulation and optimization API calls. The API calls will help you to retrieve, manipulate, and/or convert image files of your Contentstack account and deliver it to your web or mobile applications.
+
+Question: How do I resize an image with an API request?
+Answer: You can resize an image by specifying the “width” and “height” of the image.
+width
+: The “width” parameter lets you dynamically resize the width of the output image by specifying pixels (as any positive integer between 1 and 8192) or percentage values (as a percentage value between 0.0 and 0.99). In case of percentages values above 99, append a ‘p’ parameter to the value).
+height
+: The “height” parameter lets you dynamically resize the height of the output image by specifying pixels (as any positive integer between 1 and 8192) or percentage values (as a percentage value between 0.0 and 0.99). In case of percentages values above 99, append a ‘p’ parameter to the value).
+To see these parameters in action, refer to our
+documentation
+.
+
+Question: How to merge a specific portion of an image and attach it to another using an API request?
+Answer: You can use a combination of the “crop” and “overlay” parameters to achieve this activity. First, crop the desired section from the source image and then attach it to the final image.
+To crop a specific section of an image, you can use the “
+crop
+” parameter and pass the desired width and height of the section that you want to remove. The query to be used is
+?crop={width_value},{height_value}
+. For e.g., if you wish to crop an image where you want a width of 300px and a height of 400px from the center, you can specify the values in the above query as ‘
+?crop=300,400
+’. To trim only a particular side of an image, use the “
+trim
+” parameter.
+Later, use the “
+overlay
+” parameter to attach the cropped image on top of another.
+
+Question: How do I convert between image formats?
+Answer: You can use the
+format
+parameter to convert a given image from one format to another.
+
+Question: How do I add image and text overlays?
+Answer: This can be achieved using the “
+overlay
+” parameter.
+
+Question: What image file formats are supported for conversion?
+Answer: The supported formats to which you can convert your source image are .gif, .png, .jpg (for JPEG), .pjpg (for Progressive JPEG), .webp, .webpll (Lossless), .webply (Lossy), and .avif.
+
+Question: What is the advantage of reducing the image file size?
+Answer: Image optimization improves the loading speed of a website by reducing the size of uploaded images without compromising on the quality aspect. Optimization ensures a better user experience and swiftly delivers elements of a website to the browser . The reason for faster load speed is essential for a website because it factors into the SEO ranking. Also, the traffic is highly improved when the file sizes are reduced. You can optimize an image by using the
+auto
+parameter or reducing the
+quality
+of an image.
+
+Question: Can a user erase unwanted items from an image without affecting the background?
+Answer: This can be partially achieved by using an
+overlay
+image.
+
+Question: How to compress the size of an image?
+Answer: To compress the size of an image you can use the
+quality
+parameter. This parameter lets you control the level of compression to an image. You can specify the value for this parameter in whole numbers, i.e., between 1 and 100. To add a quality parameter for an image you will need to specify
+?quality={quality_value}
+after the URL of an image.
+
+Question: How to trim an image only from sides i.e. from right or left?
+Answer: You can use the “
+trim
+” parameter to trim an image from the sides/edges. This parameter comes in handy especially when you need to remove borders or white spaces around images. The value for this parameter can be given in pixels or percentage.
+To trim an image using the “trim” parameter, you need to specify the value for right and left in pixels or percentage “
+?trim={right_value},{left_value}
+”
+
+Question: Can I control an image by specifying just the width of an image which will be much larger than the actual image?
+Answer: To control the image after using the
+width
+parameter, you can disable the upscale of the image by specifying the
+disable
+parameter:
+width={value}&disable=upscale
+
+Question: Can I crop an image in a square shape and resize the width?
+Answer: Yes, you can crop an image using the
+crop
+parameter to a specific pixel or percentage. Using this parameter, you can remove pixels from an image by specifying the height and width in pixels or percentage value, or defining height and width in aspect ratio.
+
+Question: Is it possible to rotate or flip and move an image horizontally or vertically?
+Answer: Yes, the “
+orient
+” parameter gives you the ability to orient the image. By using this parameter, you will be able to move an image right, left, horizontally, vertically, or flip.
+
+Question: Is the “quality” parameter supported by all image formats?
+Answer: The “quality” parameter supports only the lossy file format and thus is not applicable for image formats such as PNG and GIF because they are lossless file formats. Refer to our
+documentation
+for more details.
+
+Question: The original image has a pink border, but I wish to change the pink border to blue. How do I do that?
+Answer: If the border is added as the background of the image, you can change the color using the “
+bg-color
+” parameter.
+
+Question: Is there any specific format or resolution in which we need to upload the image before subjecting it to any kind of transformations?
+Answer: There is no specific format for uploading images. For performing image transformation activities, you can upload images in any convenient format or resolution. If you wish to convert the format of any image, you can use the “
+format
+” parameter.
+
+Question: What kinds of transformations can the Image Delivery API calls perform on images?
+Answer: Image Delivery API calls can transform your images on demand. It can dynamically resize, convert, adjust quality, crop/trim, change orientations, and image background colors.
+
+Question: How do the Image Delivery API calls work?
+Answer: They operate via a query string URL of the API call. When a user makes a request for an image, the Image Delivery API does two things:
+Serves the desired image request from cache (cache hit).
+Transforms the source image based on the parameters in the URL of the API call.
+
+Question: Does your API support high-definition displays?
+Answer: Yes. Images can be presented in ultra high definition formats allowing you to serve pixel perfect images on everything from mobile devices to 4K monitor displays.
+
+Question: Which browsers support WebP image format?
+Answer: The browsers supporting WebP image format are Google Chrome, Opera, and Android browsers.
+
+Question: What to do if the browser does not support WebP format?
+Answer: In such cases, you can use the progressive JPEG format which is supported by most of the modern browsers.
+
+Question: Which image types does the “quality” parameter support?
+Answer: The “
+quality
+” parameter supports all images of the Lossy file type. The formats included in the Lossy file type are JPEG, Progressive JPEG, and WEBP(Lossy).
+
+Question: How do I cut out a circular section of my image using an API request?
+Answer: To display an image within a circle, use the
+overlay
+parameter. The overlay image should have a circle of transparent pixels within it. When you place this image over the actual image, the actual image will be displayed within a circle. Now, if the color of the solid background of this overlay is the same as the color of the background where the image will be placed in your app, it will give a circular cropped image effect.
+
+Question: What is a partially headless setup, and when do I need one? What does a fully headless setup look like?
+Answer: Partially headless setup means you have some portion of your website on a traditional setup and the remaining on a headless CMS. This setup is useful in cases when migrating from a conventional CMS to a headless CMS.
+The
+partially headless architecture
+diagram shows how one content section, such as blog, is migrated to a headless CMS, whereas the rest of the digital properties remain on a traditional setup.
+
+Question: What do we consider a simple site?
+Answer: A simple site is a website that has a few pages and limited third-party integration. An example of a
+simple website
+could be a marketing site of an enterprise, which uses basic integration services such as website search, site analytics, and so on.
+
+Question: How do I know if I should set up a static site or  a simple site?
+Answer: If the sole purpose of your website is to serve content, and is likely to deliver the same content to all users, you must go for a static website.
+Dynamic
+or
+simple website
+architecture, on the other hand, integrates well with other apps, helps you do more with content (such as deliver personalized content, etc.) and enables user interaction.
+
+Question: Can I start simple and move to a dynamic setup?
+Answer: Yes. In such a case, it is recommended to use the complex website architecture as it offers the required flexibility and agility to add more services.
+So initially, if your website is simple but gradually develops to become complex, use the complex website architecture for effective scaling.
+
+Question: Which setup scales the best?
+Answer: The
+dynamic website
+architecture provides better flexibility and agility. You can add more services as required, without impacting or changing any other components, enabling quick scaling.
+
+Question: What types of media files are supported?
+Answer: Contentstack supports various media file types, including image links, video links, GIFs, and more. These files can be uploaded as
+assets
+and used in
+entries
+.
+
+Question: What is the maximum allowed size of a single asset (file) that can be uploaded?
+Answer: The maximum allowed size for a single asset file is
+700 MB
+. Additionally, you can define custom file size limits (both maximum and minimum) using the
+File Size Limit
+validation rule.
+
+Question: Is there a limit to the total number of assets that can be uploaded in a stack?
+Answer: Yes. A maximum of
+10,000 assets
+can be uploaded in a stack. The limit can be increased based on your plan. Contact our
+support
+team for more details.
+
+Question: How to use Image Delivery API requests on images inserted directly into the Rich Text Editor (RTE)?
+Answer: Contentstack does not support applying
+Image Delivery API
+requests on images directly inserted into text fields. However, you can achieve this by following these steps:
+Upload the Image as an Asset
+: Upload the image to the Asset module using the
+Upload Asset
+API call. The response body will include the
+url
+parameter containing the asset’s URL and a unique
+uid
+for the uploaded asset.
+Insert the URL into the Text Field
+: In the
+Rich Text Editor
+(
+RTE
+) or any other text field, switch to the HTML code view and use the asset URL as the image source instead of directly inserting the image.
+Use the Image Delivery API
+: With the asset’s UID and URL, you can apply Image Delivery API requests to modify the image as needed.
+
+Question: Is it possible to query the same asset with different dimensions?
+Answer: Yes, you can use the
+Image Delivery API
+to query the same asset with different dimensions.
+
+Question: Is it possible to edit assets in bulk?
+Answer: No, bulk editing of assets is not supported. You can edit only one asset at a time. For more details, refer to the available
+bulk operations on assets
+.
+
+Question: Does Contentstack support additional metadata for assets and entries?
+Answer: Yes, the additional metadata support for assets/entries is available.
+
+Question: Does the version of an asset or entry change when additional metadata is added using the API?
+Answer: No, adding metadata via the API does not increment the version of the entry or asset.
+
+Question: If I publish an asset or entry, will its metadata also be published?
+Answer: When you publish an entry or asset, its associated metadata is also published. However, for bulk publishing of entries or assets, the metadata is not published. For more information, refer to the
+publish metadata
+documentation.
+
+Question: How can I add additional metadata to an asset or entry?
+Answer: You can add additional metadata to an asset or entry only through the
+Metadata for Entries and Assets
+Content Management API requests.
+
+Question: What is the maximum metadata size limit for an entry or asset?
+Answer: The maximum metadata size allowed per extension is
+5 KB
+. This includes the total metadata defined for all entries and assets associated with the extension.
+
+Question: What happens to an asset's URL if it is unpublished?
+Answer: When an asset is unpublished, it becomes inaccessible in the environments and locales it was unpublished from. However, the URL remains active and accessible within the Contentstack assets repository unless the asset is deleted.
+
+Question: Can I customize the asset filename after uploading it?
+Answer: No, once an asset is uploaded, the filename cannot be changed.
+
+Question: Does replacing an asset affect its references in entries?
+Answer: Replacing an asset does not break references in entries as long as you are using
+permanent URLs
+.
+
+Question: Can I organize assets into folders or categories?
+Answer: Yes, Contentstack allows you to organize assets into
+folders
+for easier management. You can create nested folders and move assets between them.
+
+Question: Is it possible to restore a deleted asset?
+Answer: Trash
+maintains a backup of all deleted assets for up to
+14 days
+from the date of deletion. You can
+restore
+deleted assets before they are permanently deleted.
+
+Question: Does Contentstack support asset versioning?
+Answer: Yes, Contentstack maintains a
+version history
+for assets, allowing you to view and restore previous versions if necessary.
+
+Question: What is the primary purpose of asset folder-level permissions?
+Answer: Asset folder-level permissions
+define specific actions a custom user role can perform on an asset folder. This ensures that users only interact with the folders and assets they are authorized to access, providing enhanced control over content management.
+
+Question: Can I assign permissions to multiple asset folders at once?
+Answer: Yes, you can select multiple asset folders and assign them to a custom role simultaneously. This streamlines the process of managing
+permissions
+across multiple folders.
+
+Question: Can I assign different permissions to different asset folders?
+Answer: Yes, you can assign distinct
+permissions
+to different asset folders. For example, you could grant “Read” permission to one folder (e.g., Folder 1) and “Publish” permission to another (e.g., Folder 2), depending on your organizational needs.
+
+Question: Do folder-level permissions apply to the assets and subfolders within a folder?
+Answer: Yes, when you assign
+permissions
+to a folder, those permissions also apply to its assets and any subfolders, ensuring consistent access control within the folder hierarchy.
+
+Question: Can I revoke folder-level permissions from a custom role?
+Answer: Yes, you can modify or revoke
+permissions
+for a custom role at any time. This change will immediately take effect, updating the role's access to the folder, its assets, and its subfolders.
+
+Question: What happens if a user belongs to multiple roles with different permissions?
+Answer: When a user belongs to multiple roles with varying
+permissions
+:
+Permissive actions are merged
+: If one role grants "Update" permission and another grants "Publish," the user will have both permissions.
+Cannot Do permissions take precedence
+: If one role allows "Read" and another explicitly denies "Read," the restriction takes priority, and the user’s access is limited.
+This ensures that restrictive permissions are prioritized for better control and security.
+
+Question: What are Automations?
+Answer: Automations help you to perform repetitive tasks without human intervention. You can set up an automation using various third party applications. For example, you can notify your team via an email whenever an entry is created in your stack.
+
+Question: How do you set up an automation?
+Answer: To set up an automation, you need to configure your trigger and action connectors. To learn more, refer to the
+Create Automation
+step in the
+Get Started with Automations
+document.
+
+Question: What are connectors?
+Answer: Connectors are a combination of Triggers and Actions events. When a trigger event is executed, the action connector performs the defined steps. Refer to
+Automate Connectors
+to get started.
+
+Question: What is the difference between trigger and action connectors?
+Answer: Trigger connectors are conditions that help set off an automation whenever the  selected event is executed. Action connectors is the action performed when a trigger event is executed. For example, an automation is set up to send a slack message (action event) whenever an entry is created (trigger event) in Contentstack.
+
+Question: Can we add multiple triggers and actions in a single automation?
+Answer: You can configure only one trigger event in a particular automation. You can configure multiple actions for a single automation. For example, you can set up an automation to perform end to end translation when an entry is created/updated in Contentstack. For this, you need to configure different action connectors to carry out the translation process. To learn more, refer to our
+End to End Translation using Smartling
+example.
+
+Question: Where can I view logs for my automations?
+Answer: You can view the logs for your automation in the
+Execution Log
+section. This is useful for checking the status of your automations. To learn more, refer to our documentation on
+Execution Log
+.
+You can also monitor the acitvities performed in a particular project via the
+Audit Log
+.
+
+Question: Where can I view all apps connected within a project?
+Answer: You can view all the connected apps for your project in the
+Connected Apps
+section. You can check the authentication status of an app or re-authorize an app. To learn more, refer to our documentation on
+Connected Apps
+.
+
+Question: How do I edit an existing Automation?
+Answer: Once you create an Automation, the list of existing automations appears in the Automations listing page. In the
+Actions
+column, click the three ellipses icon, and then click the
+Edit
+icon that you see for editing the automation. Refer to our documentation on
+Edit Automation Details
+.
+
+Question: How do I delete an existing Automation?
+Answer: On the Automations listing page, click the three ellipses icon, and then click the
+Delete
+icon that you see for deleting the automation. Refer to our documentation on
+Delete Automation
+.
+
+Question: How do I customize the name of the configured step?
+Answer: In the automation, click the edit icon visible on the action header to rename the step. Add a suitable name for the step and save it. Refer to our documentation on
+Rename Step
+.
+
+Question: How do I re-authorize a connected app?
+Answer: To re-authorize a connected app, follow the steps given below:
+In the
+Connected Apps
+section, select the app that you want to re-authorize.
+Click over the connection and click the
+Reauthorize
+icon.
+Change necessary permissions and click the
+Authorize
+button.
+
+Question: What is the new Analytics feature in Contentstack?
+Answer: The new Analytics feature integrates Product Analytics and Mission Control, offering a unified view of interactions with Contentstack’s CMS, Launch, and Automate. It provides comprehensive metrics, including status codes, cache usage, SDK usage, and top URLs.
+
+Question: How do I access the Analytics feature?
+Answer: To access Analytics, log in to your
+Contentstack account
+, select the organization from the dropdown menu in the header, and click the “Analytics” icon in the left navigation panel.
+
+Question: Who can access the Analytics feature?
+Answer: The Analytics feature is only accessible to Organization
+Owners
+and
+Admins
+.
+
+Question: Can I filter data in the Analytics dashboard?
+Answer: Yes, you can filter data in the Analytics dashboard based on specific services, groups, and durations.
+Note
+: The date range for these filters must be within
+90
+days.
+
+Question: Can I see analytics for the pages of my website?
+Answer: Contentstack does not provide analytics for the pages of your website. However, you can use any external tool to get the analytics.
+
+Question: How does this feature affect the other modules in Contentstack?
+Answer: The modules currently available in Contentstack will not be affected. Some modules are branch-specific. Whereas some are globally available throughout all the branches. You will have an additional scope section where you can decide whether you want that module for either all or specific branches for which you want the module.
+Please refer to our
+Branch-Specific Modules
+and
+Global Modules
+documentation for more information.
+
+Question: What are branch-specific modules?
+Answer: Modules such as
+Content Types
+,
+Global Fields
+,
+Entries
+,
+Assets
+,
+Publish Queue
+,
+Releases
+,
+Languages
+,
+Extensions
+,
+Audit Logs
+,
+Global search
+, and
+Labels
+are branch specific. They can be created, updated, or deleted within a particular branch without affecting any other branch. Their details can differ across the other branches present in a stack.
+Please refer to our
+Branch-Specific module
+documentation for more information.
+
+Question: What are global modules?
+Answer: Modules such as
+Environments
+,
+Webhooks
+,
+Workflows
+,
+Publish Rules
+,
+Users
+,
+Roles,
+and
+Tokens
+are globally available. Details for these modules are available across every branch of the stack.
+Please refer to our
+Global Modules
+documentation for more information.
+
+Question: Which Roles can access the branches feature?
+Answer: Any user with the role “
+Owner,
+” “
+Admin,
+” and “
+Developer
+” will be able to use the branches feature.
+Content managers
+can only work within the branches assigned to them.
+Custom roles
+can access branches as per the permissions assigned to them.
+
+Question: Can we set up a webhook or workflow for a specific branch?
+Answer: Yes. You can set up a webhook or workflow for a specific branch. The system allows the creation of
+branch-specific
+workflows for a content type.
+
+Question: Can I add languages specific to a branch?
+Answer: Yes, you can add languages only to a specific branch of the stack. That language will not be available in other branches of the stack. Please refer to the
+Languages
+section in our
+Branch-specific Modules
+document for more information.
+
+Question: How do I work with Extensions within branches?
+Answer: Extensions are specific to a branch. If you add an extension within a branch, it won’t be available across other branches. Please refer to the
+Extensions
+section in our
+Branch-specific Modules
+document for more information.
+
+Question: Can I delete the main branch?
+Answer: No, the main branch cannot be deleted. Please refer to the
+Limitations of Branches
+document.
+
+Question: Can two different aliases point to the same branch?
+Answer: Yes, two different aliases can point to the same branch. Learn how to
+Assign an Alias to a Branch
+.
+
+Question: Can a branch and an alias have the same unique ID?
+Answer: No, you cannot have the same unique ID for a branch and an alias.
+
+Question: How do I work with branches using Content Management API?
+Answer: You can retrieve information from all or a specific branch. You can also create and delete a branch using the API requests. You will need to pass the
+branch
+header if you want to execute calls within specific branches. Please refer to the
+Branches
+collection in our Content Management API documentation for more information.
+
+Question: What changes are expected in the existing Content Management API requests?
+Answer: You can add a
+branch
+header while executing an API request to get details specific to a branch. If this header is not mentioned, by default, data will be retrieved from the "main" branch of your stack. The response body for every request will contain the
+_branch
+parameter specifying the branch from which the information is retrieved. Please refer to our
+Content Management API
+documentation for more information. You can also visit the
+API Change Log
+for more details about the breaking changes.
+
+Question: How can I compare branches?
+Answer: You can compare two branches to get the differences in the content type or global field modules, by either using the
+Comparing Branches
+requests in
+Content Management API
+or the
+Compare Branches using the CLI.
+
+Question: How can I merge branches?
+Answer: You can merge the differences in the content type or global field modules of two branches, by either using the
+Merging Branches
+requests in
+Content Management API
+or the
+Branch Merge using the CLI.
+
+Question: Is the compare and merge feature available for all the modules in a branch?
+Answer: No, currently the compare and merge feature is only available for the content type and global field modules.
+
+Question: Can I compare and merge branches via the CMS?
+Answer: No, currently the compare and merge feature is only available via
+CMA requests
+or
+CLI commands.
+
+Question: How many branches can I compare or merge at once?
+Answer: You can compare or merge two branches at a time. Please refer to our documentation on
+Comparing and Merging Branches
+for more information.
+
+Question: Are there different strategies for merging two branches?
+Answer: Yes, there are various merge strategies to choose from while merging two branches. Please refer to our
+Merging Branches
+documentation for more information on how to select the best possible merge strategy.
+
+Question: What if my merge action fails?
+Answer: Before performing a merge, pre-checks are performed to make sure the merge can complete. If these pre-checks fail, the merge will not be attempted, and you’ll see that merge job as failed, with an explanation of why. If these checks pass, the merge will be performed. By default, a backup branch is created of the branch you are merging into before any merge action takes place. You can create and point an alias to this backup branch to get your production website back to it’s previous state. Please refer to our
+Merging Branches
+documentation for more information on how to select the best possible merge strategy.
+
+Question: What is a Brand Kit?
+Answer: Brand Kit is a cutting-edge platform designed to ensure AI-generated content aligns with a customer's brand, style, and messaging. It enables the creation of brand-specific profiles and provides access to relevant company information, ensuring consistent, on-brand AI-generated content.
+
+Question: Who is Brand Kit for?
+Answer: Brand Kit is designed for organizations and content teams that prioritize brand consistency and integrity in their digital content. It is ideal for organizations aiming to maintain a distinctive brand voice across all AI-generated content.
+
+Question: How are Brand Kits associated with Stacks?
+Answer: In Contentstack, a Brand Kit can be associated with one or more stacks, allowing consistent branding across multiple digital properties. Each Brand Kit is connected to a single Knowledge Vault, providing a centralized source of truth for all brand assets and guidelines.
+
+Question: How can I create and use a Brand Kit as a first-time Contentstack user?
+Answer: Refer to the
+Get Started with Brand Kit
+documentation to create and use a new Brand Kit.
+
+Question: How do I delete an existing Brand Kit?
+Answer: To permanently delete an existing Brand Kit, go to the Brand Kit settings and click the
+Delete Brand Kit
+button. Refer to the
+Delete a Brand Kit
+documentation for more information.
+
+Question: What are Voice Profiles?
+Answer: Voice Profiles in Contentstack's Brand Kit enables you to create custom guidelines for the tone, style, and language of the AI-generated content. This ensures that your brand's voice remains authentic and engaging across all digital touchpoints.
+
+Question: How do I set the Communication Style Mixer to create a Voice Profile?
+Answer: To create a Voice Profile in Contentstack's Brand Kit, adjust the Communication Style Mixer settings, including the Formality Level, Tone of Voice, Humor Preference, and Language Complexity Level. These settings help define how your brand's AI-generated content should sound and engage with the audience. For more details, refer to the
+Create a Voice Profile
+documentation.
+
+Question: How do I delete an existing Voice Profile?
+Answer: To delete an existing Voice Profile from a Brand Kit, go to the Voice Profiles dashboard. Click the
+Delete
+button under the
+Actions
+tab to permanently delete the Voice Profile. For more information, refer to the
+Delete a Voice Profile
+documentation.
+
+Question: What is the Knowledge Vault?
+Answer: The Knowledge Vault is a centralized repository where you can store, manage, and organize brand-related documents, data, and content. This vector database stores a curated collection of factual information specific to a company.
+The Knowledge Vault is a trusted source for AI, allowing it to generate content that is not only tonally consistent but also grounded in accurate and relevant company data.
+
+Question: What content should you include in my Knowledge Vault?
+Answer: Your Knowledge Vault should include factual, company-specific information such as background, products/services, industry knowledge, customer data, documentation, and marketing data to ensure AI-generated content aligns with your brand's identity and offerings.
+
+Question: What kind of content should I avoid including in my Knowledge Vault?
+Answer: You should avoid including irrelevant, outdated, confusing, sensitive, or mislabeled data that could introduce errors or inconsistencies in AI-generated content. You should try including only accurate, up-to-date, and clearly labeled brand assets and information to maintain the integrity and coherence of your digital presence.
+
+Question: How can I use the Europe, Azure North America, Azure Europe, or Google North America endpoint to execute CLI commands?
+Answer: Use the
+Set Region
+command to set up and use the Europe, Azure North America, Azure Europe, or Google North America region.
+
+Question: Does the “Delete Token” command delete the token from the stack?
+Answer: No. The
+Delete Token
+command removes the token only from the current session and not from the stack.
+
+Question: Can I clone stacks using CLI?
+Answer: Yes. Refer to the
+Clone a Stack
+guide to get started.
+
+Question: How does the export and import command work?
+Answer: You can use the
+export
+and
+import
+commands to migrate your content from one stack to another. To do this, first you need to use the export command to export the content from the source stack and then use the import command to import it into the destination stack.
+
+Question: How to export content into a .CSV file?
+Answer: You can use the
+cm:export-to-csv
+CLI command
+to export stack
+data into a CSV file. For more details refer our detailed
+guide
+on the topic.
+
+Question: What is the Bootstrap Starter Apps command?
+Answer: The Bootstrap Starter Apps command automates the procedure of stack creation and setting up the project (starter app). Follow
+this
+guide to set up and run a starter app with minimal steps.
+
+Question: Can I merge branches using the CLI migration command?
+Answer: No. Currently, the
+branches
+merge feature
+is
+not supported
+.
+
+Question: How to restore a previous version of a content type?
+Answer: Though we are yet to introduce Content Type versioning in the UI version of our app, you can use the right set of API requests to restore a previous version of your content type.
+To do so, you need to perform the steps given below:
+Fetch the previous version of the content type that you want to restore using the
+versioning API
+.
+Use the
+Import a content type
+API request to import the content type version that you have fetched in the previous step.
+Warning
+: The above process would restore a previous version of the content type and save it as a new version. This might lead to data loss.
+
+Question: Do you provide any sample content type templates?
+Answer: Contentstack provides
+sample apps
+that contain ready-made templates of the various content types (JSON files) required for the app. You can import these JSON files into your stack to get started with the app.
+
+Question: Is there a limitation to the number of fields that can be added in a content type?
+Answer: Yes. When
+creating a content type
+, a user can add at the most
+100
+fields in a content type.
+
+Question: Is there a way to remove the default “Title” field from a content type schema?
+Answer: No, the “
+Title
+” field is the default field and you cannot remove it from the content type schema.
+
+Question: Can the “Title” field be set as non-unique?
+Answer: No. By default, the “Title” field is unique. Thus, you cannot set it as non-unique.
+
+Question: How are references supposed to work?
+Answer: The “
+Reference
+” field allows you to include the entries of other content types within a content type.
+
+Question: Can we add tool tips to certain fields, so that users can quickly refer to what they need to do? Also, are there any limitations with the tool tips, e.g., can we add hyperlinks and a large amount of content?
+Answer: Yes, you can add tooltips by using the “
+Help Text
+” property of any field. While you create/edit a
+content type
+, click on any field to edit its properties. Then, in the
+Help Text
+input field, enter the text that you wish to display as the tool tip. It also supports hyperlinks.
+Though there is no limitation to add elaborate content in tooltips, it is advisable to keep it short and precise.
+
+Question: How to change the display name of any new field added to a content type?
+Answer: When you
+create a content type
+and add a field to it, perform the following steps to change the display name of a field:
+Click on the newly added field to open its
+Edit Properties
+window.
+Provide a suitable title under the “
+Display Name
+” property.
+
+Question: Can I change the UID of a content type?
+Answer: No, you cannot change the UID of a content type once you have created a content type. When you
+create a content type
+, Contentstack, by default, assigns a UID to it.
+But you can change this UID while creating the content type, as shown below:
+
+Question: I tried to change the UID of a field to camelCase, but I got an error?
+Answer: Contentstack does not allow its users to enter uppercase characters in
+Unique IDs
+of fields. The unique ID of a field can only contain lowercase characters (a-z) and numbers (0-9).
+
+Question: Can I add custom fields to a content type?
+Answer: Yes, you can create and add custom fields to your content type. To learn about it, refer to the
+Custom Fields
+documentation.
+
+Question: I built a new content type, but I’m not able to save it. I’m getting the following error:  “Content Type update failed. Schema.3.uid is a restricted value”  Also, I can’t seem to edit the unique ID. How can I save the content type without losing all my work?
+Answer: The error says that the UID of the specified field of the
+content type
+is a restricted value.
+To be precise, you’re unable to save your content type because the UID of the field is a value that belongs to the
+Restricted keywords for UIDs
+list. The keywords mentioned in this list cannot be used as UIDs for content types and entries.
+Make sure that you do not use any of the restricted values when setting the UIDs of the fields.
+
+Question: Do you have any suggested best practices for making changes in the schema of a content type?
+Answer: We have a detailed
+documentation
+that can guide you through this process. We have covered other scenarios in the guide related to content type changes and how you can ensure there is no data loss when you do so.
+
+Question: Is there a character limitation when adding key-value pairs in the Select field?
+Answer: A key-value pair choice in a Select field can contain a maximum of
+100
+characters per property i.e., 100 characters for key and 100 characters for value.
+
+Question: Will there be a change in the JSON schema of a Select field that contains key-value pair choices?
+Answer: Yes, the JSON schema for Select fields with key-value pairs will contain key and value data. Please refer to our JSON schema for a select field
+documentation
+to understand the changes.
+
+Question: Will the choices be deleted if I toggle on/off the Enable key-value button for the Select field?
+Answer: Yes, all the existing choices will be lost if you toggle on/off the
+Enable key-value
+button for the
+Select
+field.
+
+Question: Can I migrate content from existing HTML-based RTE to the new JSON RTE?
+Answer: Yes, you can migrate content from existing HTML-based RTE to the new JSON RTE using CLI. Please refer to our
+migration guide
+for more details.
+
+Question: Can I migrate content from HTML-based RTE to JSON RTE in bulk?
+Answer: Yes, Contentstack allows you to migrate your rich text content from your existing HTML-based RTE fields to the new JSON RTE fields for all entries of a content type in just a few minutes. Please refer to our
+migration guide
+for more details.
+
+Question: How can I add class HTML tags in the new JSON RTE?
+Answer: To add HTML Tags in JSON RTE, in the formatting bar click
+Property
+>
+Add Properties
+. In the Pop up enter the required details and click
+Apply
+.
+
+Question: Can I get a HTML response for my JSON RTE?
+Answer: Yes, you can add the
+include_html
+parameter while fetching an entry to get a HTML response. Please refer to the following API requests in our CMA API documentation:
+Create a content type with JSON RTE
+Create an entry with JSON RTE
+Update an entry with JSON RTE
+
+Question: What is Contentstack?
+Answer: Contentstack is a headless CMS with an API-first approach that puts content at the center. It is designed to simplify the process of publication by separating code from content. You can access, create, and manage content in Contentstack, via RESTful APIs, across multiple channels such as websites, mobile apps, or any other platform. Go through our
+Contentstack
+website.
+
+Question: How do I get started with Contentstack?
+Answer: You will first need a Contentstack account to get started. Once you have an account, read our docs to understand how Contentstack works. Developers who are well aware of Contentstack and are interested in creating websites and apps can get started with our docs on various
+platforms
+. While new users, content managers, and editors can go through the basic concepts of creating a website or app in Contentstack
+in our
+Content Manager's Guide
+.
+
+Question: Is there a step-by-step tutorial to create a website/app from scratch?
+Answer: Yes, you can go through the
+Platforms and SDKs
+section where you can find our step-by-step tutorial for creating a website or app in Contentstack for some of the common platforms, such as JavaScript, iOS, React Native, etc.
+You can also refer to the
+Sample Apps
+for more step-by-step guides.
+
+Question: What software do I need to get Contentstack running?
+Answer: Since Contentstack is a cloud-based CMS, you do not need anything (except for an internet connection, a browser,  and a
+Contentstack
+account) to get started.
+
+Question: What kind of support does Contentstack provide?
+Answer: Contentstack provides 24x7 online support. You can contact the support team either by using the in-product chatbox or by emailing us at
+support@contentstack.com
+.
+To learn more about Contentstack, visit
+Contentstack Academy
+.
+
+Question: Does Contentstack provide any kind of training?
+Answer: Contentstack does not provide any formal training. However, it provides extensive
+documentation
+that covers a wide range of topics including, important concepts, guides, tutorials, SDK and API references, code samples, and short videos that help you learn and get started with Contentstack.
+
+Question: What hardware do I need to get Contentstack running?
+Answer: Contentstack is a cloud-based CMS. This means that you just need an internet connection on your desktop, laptop, or tablet to get started with Contentstack.
+
+Question: What browsers do you support? Are there any system requirements for using Contentstack?
+Answer: Contentstack runs on all modern desktop browsers.
+
+Question: Where does Contentstack store/save my data?
+Answer: Contentstack stores all of its data in MongoDB Server.
+
+Question: Do I have to host my website with Contentstack?
+Answer: You are free to host your website with any provider of your choice. Alternatively, you can use Contentstack’s own front-end hosting and deployment platform,
+Contentstack Launch
+, for websites built on the Contentstack CMS.
+
+Question: Are the Sync tokens and Data stored in encrypted formats?
+Answer: No, the Sync tokens and Data are stored in the Filesystem in a plain-text format.
+
+Question: Can I store my data on other database systems?
+Answer: Yes, you can store your data on Filesystem, as well as on other database systems, such as MongoDB.
+
+Question: Currently, I am running a website on contentstack-express. So, how can I switch from contentstack-express to DataSync?
+Answer: You can switch from contentstack-express to DataSync by following the steps mentioned in the
+migration guide
+.
+
+Question: How to choose a region?
+Answer: You can choose a
+region
+for your organization data while subscribing for a
+Contentstack (organization) account
+.
+Contact our
+support team
+for more details.
+
+Question: Which regions are used to host the North America and Europe region for Contentstack?
+Answer: For AWS North America, our main region is
+Oregon, US (us-west-1)
+and the backup region is
+North Virginia, US (us-east-1)
+.
+For AWS Europe, our main region is
+Ireland, Europe (eu-west-1)
+and the backup is
+Frankfurt, Europe (eu-central-1)
+.
+For Azure North America, our primary region is
+West US 2
+and our backups are configured in
+US East
+region(
+MongoDB Database
+backups) and
+West US
+region(
+Assets backups
+)
+For Azure Europe, our primary region is
+US-East-1 (N. Virginia)
+and our backup region is
+EU Central 1 (Frankfurt)
+
+Question: Which regions are used to host the GCP North America region for Contentstack?
+Answer: For GCP North America, our primary region is
+Oregon, US (us-west1)
+and the backup region is
+South Carolina, US (us-east1)
+
+Question: Can customers store some data in one data center and some in another?
+Answer: The European data center is completely separate from the North American data center. So, if you choose a region for your organization, the whole data of your organization will reside in the selected region.
+
+Question: Is organization data shared between European and North American data centers?
+Answer: No
+. Data is NOT shared between the European and North American data centers. Both the data centers are 100% separate and isolated from each other. Every piece of your
+organization
+data resides in your choice of
+region
+. This means that you cannot decide to store some parts of the organization data in one region and the rest in the other.
+Once an organization has been registered/ created, you cannot change the organization region.
+
+Question: How should I use the APIs for my organization’s apps in the European region?
+Answer: The base API URLs to access the European, Azure North American, and Azure European region’s content are different from those of the North American region. Refer to the
+API Endpoints
+section above for more details.
+
+Question: Will European and North American regions of Contentstack receive the same set of product and feature updates?
+Answer: Yes
+. New product features and updates will be available in both regions. When a new product feature is released, it's first made available to the North American region. Then, in the next 2 weeks, the same feature will be available for the European region. We will keep our customers informed about the release dates through the pre- and post-release emails.
+
+Question: If the North American instance were to become unavailable, how quickly could customers be migrated to the European instance? Does that cause any data security risks?
+Answer: The North American and European data centers are completely separate from each other and
+not meant to serve as a disaster recovery mechanism if either of them goes down
+. Within each data center, we already have an efficient disaster recovery system in place that works to ensure continuous and high availability during an outage.
+
+Question: Is the same set of product and feature updates delivered to Azure and AWS regions of Contentstack?
+Answer: Yes. New product features and updates will be available in both regions at the same time. We will keep our customers informed about the release dates through the pre-release and post-release emails.
+
+Question: Is there a difference in performance and data security between Azure and AWS regions of Contentstack?
+Answer: No. Though both regions serve different customer bases, there is no difference in their performances. Contentstack app functions at the optimum level in the Azure as well as the AWS regions.
+Similarly, both regions have high levels of
+data security and privacy
+.
+
+Question: As a customer what changes for me if I migrate to Azure NA region or Azure EU Region?
+Answer: The Azure NA or Azure EU region is separate and independent from other regions and therefore has different login URLs, passwords, and API endpoints to access organization apps and content.
+
+Question: I want to migrate from AWS to the Azure instance. Can region migration cause any data security risks?
+Answer: No. Both the regions have an efficient disaster recovery system that works to ensure continuous and high availability during an outage.
+
+Question: How do I login to the Azure NA region?
+Answer: You can either use the
+Azure NA region login endpoint
+or navigate to the
+login page
+and select “Azure North America” as your region.
+
+Question: How do I login to the Azure EU region?
+Answer: You can either use the
+Azure EU region login endpoint
+or navigate to the
+login page
+and select Azure Europe as your region.
+
+Question: How do I login to the GCP North America region?
+Answer: You can either use the
+GCP NA region login endpoint
+or navigate to the
+login page
+and select “GCP North America” as your region.
+
+Question: Can I store my organization’s content in multiple regions?
+Answer: No. You cannot store parts of your organization's content in multiple regions. If you choose the Azure North America (NA) data center as your region, all of your organization's data will reside in the same region.
+
+Question: How can I check the Health Status of any region?
+Answer: Navigate to the
+status.contentstack.com
+page and scroll down to the section of your region to know the status.
+Currently, we have support for five regions.
+Amazon Web Services US Region
+Amazon Web Services EU Region
+Microsoft Azure US Region
+Microsoft Azure EU Region
+Google Cloud Platform US Region
+
+Question: Are there any changes to the SLA for different Contentstack regions and datacenters ?
+Answer: No. All regions and data centers offer the same tiers of SLA as defined in the Contentstack-Customer agreement.
+
+Question: ​What is the difference between Access Tokens and Delivery Tokens?
+Answer: Both
+Access Token
+and
+Delivery Token
+gives you read-only access to a stack, however, both are different. Access Token lets you retrieve published as well as draft (unpublished) entries irrespective of the environment. Whereas Delivery Tokens retrieves only the published entries of the environment with which it is associated.
+Note:
+We have stopped supporting Access Tokens for all stacks created after December 16, 2020. We recommend using
+Delivery Tokens
+to access published content and
+Management Tokens
+for making content management API requests.
+
+Question: Is there a maximum limit to delivery tokens that can be created in a stack?
+Answer: You can create up to
+20
+delivery tokens in a stack.
+
+Question: What is the scope of Delivery Tokens?
+Answer: Scope, in this context, is the environment with which the given delivery token is associated. For example, if you create a delivery token with the “production”
+environment
+in its scope, the delivery token will fetch the content of only the “production” environment.
+
+Question: ​Can Delivery Tokens be used to create content?
+Answer: No, you can use it only to retrieve published content, and not to create or update content.
+
+Question: ​Can I use Delivery tokens to fetch unpublished content?
+Answer: No. Delivery Tokens can be used to fetch only published content of the associated environment. It cannot be used to fetch unpublished or draft content.
+
+Question: Can we have a Preview Token without a Delivery Token?
+Answer: No.
+Preview Tokens
+are associated with
+Delivery Tokens
+. If a Delivery Token does not exist, you will have to first create a Delivery Token and then generate a Preview Token.
+
+Question: Who can create a Preview Token?
+Answer: A
+Preview Token
+can be created by anybody who has access to your stack settings.
+
+Question: What is Developer Hub?
+Answer: Contentstack Developer Hub
+is an app development framework/portal that developers can leverage to build, host, and publish ready-to-use private or public apps. In addition, it includes app development
+API
+s,
+SDK
+s, and other tools that can help developers build apps with ease.
+
+Question: What is the Contentstack Developer Hub Framework?
+Answer: Contentstack Developer Hub
+Framework is an app development platform you can use to build, host, and publish apps. It lets you define further details for your app by adding
+UI locations
+, Integrating
+OAuth
+, and setting up
+Webhooks
+.
+
+Question: What are apps in Contentstack CMS?
+Answer: Apps and other resources help you extend the capabilities of our core CMS and customize its functionalities. They allow you to enhance the Contentstack experience by connecting to various third-party services in simple one-click solutions.
+
+Question: Who can develop apps?
+Answer: Contentstack supports two types of apps:
+Stack Apps:
+Users registered as the
+owners
+/
+admins
+of the stack, or owners/admins of the corresponding organization can create and install stack apps.
+Organization Apps:
+Only the
+owners
+/
+admins
+of the corresponding organization can develop and install the apps.
+
+Question: How many apps can be developed in one organization?
+Answer: Currently, the limit is 50 apps. To increase the limit, please contact
+customer support
+.
+
+Question: How do I secure my application?
+Answer: Your apps communicate with Contentstack via two major touchpoints:
+Webhooks
+and
+UI Locations
+. Contentstack provides signed support for both integrations. The
+signed feature for webhooks
+allows developers to verify whether the webhook requests originated from Contentstack. Also, the signed feature for UI Locations enables the initial page load calls to contain a
+JWT token
+that is further used to verify whether the page load request originated from Contentstack itself.
+While communication to Contentstack from outside resources, use
+OAuth support token
+instead of user session tokens or management token. These are easy to manage and scale as per the app developer’s demand.
+
+Question: How do I submit apps to be published on the Marketplace?
+Answer: The
+Contentstack Marketplace
+team accepts apps from Contentstack-certified partners. A dedicated team reviews these apps before publishing them on the Contentstack Marketplace platform.
+The end-to-end process for app submission and approval involves these steps:
+Agree to Contentstack Terms of Service.
+The Marketplace team provides detailed documentation to guide the developers about
+app creation
+and submission.
+Fill out the metadata content form and submit a clone of your app for review.
+The marketing content for your app will be created by collaborating efforts made by you and the Marketplace team.
+The Marketplace team conducts app reviews along with the marketing content.
+App testing and security checks.
+Publish the app.
+
+Question: What is the difference between apps and extensions?
+Answer: Apps are the future for integrating and implementing third-party solutions within our
+headless CMS
+. Unlike extensions, apps offer advanced functionalities, enhancing all the features of extensions and more for seamless integration with your favorite third-party platforms.
+Contentstack apps provide an interactive UI for managing custom app configurations. Apps can be reused across multiple stacks, whereas extensions are limited to a specific stack. Learn more about the differences here.
+For developers, creating complex functions with apps is easier, faster, and more feature-rich.
+
+Question: Are apps encrypted?
+Answer: Yes. Contentstack Marketplace Apps require TLS 1.2 or higher communications, including HTTPS.
+
+Question: What are the regions supported by Contentstack?
+Answer: Contentstack currently supports three regions:
+AWS North America
+,
+AWS Europe
+,
+Azure Europe
+, and
+Azure North America
+. Contentstack-supported regions are hosted in the following data centers:
+For AWS North America, our central region is
+Oregon
+,
+US (us-west-1)
+, and the backup region is
+North Virginia
+,
+US (us-east-1)
+.
+For AWS Europe, our main center is
+Ireland
+,
+Europe (eu-west-1)
+, and the backup is
+Frankfurt
+,
+Europe (eu-central-1)
+.
+For Azure North America, our primary region is
+West US 2
+and our backups are configured in
+US East region (MongoDB Database backups)
+, and the
+West US region (Assets backups)
+.
+For Azure Europe, our primary region is
+West Europe
+(Netherlands)
+and our backup region is
+EU Central 1
+(Frankfurt).
+
+Question: Where can I find guides and documentation related to Developer Hub?
+Answer: Here is the list of guides that walks you through how to build apps using Developer Hub.
+About Developer Hub
+Creating an App in Developer Hub
+Installing your App via Developer Hub
+Configuring an App
+Managing your Apps
+Managing OAuth
+For more guides and documentation, visit our
+Developer Hub
+page.
+
+Question: How can I preview my entry before publishing?
+Answer: Contentstack offers
+Live Preview
+functionality, enabling you to review your entry content across various channels before saving or publishing it on your live website. This feature allows you to edit an entry and observe content changes simultaneously in real-time.
+
+Question: If I have deleted an entry that has currently been published to an environment, how will this action impact the entry?
+Answer: When you delete an entry that has been published, that entry will get unpublished. This means that the entry will cease to display on your web/mobile property.
+
+Question: Is the entry UID unique per stack? Or is it unique to a content type?
+Answer: Entry UID is unique per stack.
+
+Question: How is versioning of entries handled?
+Answer: Every time you save an entry with changes, Contentstack creates a new version of the entry. Users can view all the versions and compare any two versions of an entry at a time. If you wish to switch back to a previous version, you can simply click the Version drop-down of your entry's page and 'View' the version or 'Compare' an earlier version with the current version from the list.
+If you wish to make any previous version as the latest version of the entry, just select the required previous version and click on 'Save'.
+
+Question: How do I know if an entry sent for publishing is actually published?
+Answer: The '
+Publish Queue
+' section shows the list of all the items sent for publishing, along with its current publish status (published/pending/failed).
+
+Question: I am wondering why the status of the entries in my Publish Queue is marked as 'Pending'? When I attempt to retrieve entries using the Content Delivery API I get an empty array.
+Answer: First, you need to check whether the ‘Deploy Content to Server’ option is enabled for the environment to which the entry is published. Then, the latest version of the contentstack-express server needs to be installed on your system. Until then, the status of entries shall be displayed as pending.
+
+Question: Can we bulk publish multiple entries at once?
+Answer: Yes. Currently, you can
+bulk publish multiple entries
+. Check out the
+CLI guide
+and
+Publish an Entry
+sections to know more.
+You can also bulk publish multiple entries with nested references at once. Check out our
+Bulk Publish Entries with Nested References
+documentation to know more.
+
+Question: Can I publish nested references while publishing a single entry?
+Answer: Yes, you can publish all nested references up to 5 levels of depth by publishing a single parent entry. Check out our
+Publish Entries with Nested References
+documentation to know more.
+
+Question: I am trying to create a new entry using the API and I am getting the following permissions error: { "error_message": "Access denied. You have insufficient permissions to perform this operation.", "error_code": 162 }. What could be the problem?
+Answer: To create entries in a stack, you need to be either the
+owner of the stack
+or you need to be assigned a role that contains write access to the stack. If you are not the owner of the stack, you need to acquire write access to your role from the owner of the stack.
+
+Question: I have published entries but have not been able to find information on how to change the status in the Publish Queue.
+Answer: When you publish an entry, the system automatically puts it in the queue for publishing. The ‘Publish Queue’ section shows the list of all the items sent for publishing, along with their current status. You cannot manually change the status of an entry in the Publish Queue.
+
+Question: Does Contentstack provide auto-save feature? If, by chance, I leave the page while in the midst of creating an entry or content type, will Contentstack save the data?
+Answer: Contentstack does not support the auto-save feature, and so, unsaved data will be lost if not saved manually by the user. To avoid such inconveniences, always make sure you save the data before navigating away from the page.
+
+Question: If I have published a set of entries of Content Type ‘ABC’ on an environment (let’s say, staging), and then made some changes to the structure of this content type, will this impact the entries that I had published on ‘staging’?
+Answer: No. The published entries in this case will not be affected. It will only be affected if you republish the entries on ‘staging’ after making changes to the content type ABC. Note that making changes to an existing content type (having entries) may cause the
+entries
+to lose data in Contentstack, but not on the published
+environment
+.
+
+Question: Which users or roles can use the entry comments feature?
+Answer: Users or roles with "read" access to a specific content type or entry can access the entry comments feature. For more information, refer to the
+Mention Users or Roles in a Comment
+document.
+
+Question: Can we set up a webhook to trigger based on entry comments?
+Answer: No, webhooks cannot currently be triggered by entry comments.
+
+Question: I have comments on a field that was later deleted. Can I still access those comments?
+Answer: If you delete a field with associated comments, both the field and its comments will no longer appear in the entry editor. The discussion automatically resolves and moves to the
+Resolved
+section in the
+Discussions
+tab. You can access these details anytime through the Discussions tab in the right navigation panel. For more information, refer to the
+Entry Comments
+document.
+
+Question: Can I add comments to a Global field or Group field as a whole?
+Answer: No, comments can only be added to the subfields of "Group" and "Global Fields", but not to the parent field as a whole. For more information, refer to the
+Add a Comment
+document.
+
+Question: I am unable to add comments to a Global field in my entry marked as “Multiple”. How can I resolve this?
+Answer: To add comments to the subfields of a "Group", "Modular Blocks", or "Global" field marked as "Multiple," you must first enter data in the fields and save the entry. After saving, you can start adding comments to the subfields. For more information, refer to the
+Add a Comment
+document.
+
+Question: Can I add comments to a Modular Blocks field as a whole?
+Answer: No, comments can only be added to the fields inside each block of a "Modular Blocks" field, not to the parent "Modular Blocks" field as a whole. For more information, refer to the
+Add a Comment
+document.
+
+Question: Can I have more than one active discussion in the same field?
+Answer: No, only one active discussion is allowed per field. However, an entry can have multiple open discussions across different fields. For more information, refer to the
+About Discussions
+document.
+
+Question: Can I reopen a resolved discussion?
+Answer: Yes, you can reopen a resolved discussion if there is no active discussion on the field it was originally linked to. For more information, refer to the
+Reopen a Discussion
+document.
+
+Question: Can I have separate discussions for entries present in the master locale and other localized versions of the entry?
+Answer: Yes, discussions can be field-specific for each localized version of an entry. However, the "Comments" feature is not available for unlocalized entries or older versions. For more information, refer to the
+About Discussions
+document.
+
+Question: Can I track the history of changes to a comment?
+Answer: No, changes or edits made to comments are not tracked. Once submitted, comments are saved as-is.
+
+Question: Are comments visible in exported entries?
+Answer: No, comments and discussions are not included in the exported entry data.
+
+Question: Will users be notified when a comment is added?
+Answer: Yes, tagged users receive email and
+in-app notifications
+.
+
+Question: Is it possible to tag external users or teams in a comment?
+Answer: No, only users with access to the content type or entry can be tagged or notified. For more information, refer to the
+Mention Users or Roles in a Comment
+document.
+
+Question: Do comments in one locale carry over to other locales?
+Answer: No, comments are specific to the field in the locale they are added to and do not carry over to other localized versions.
+
+Question: If I change the master locale entry, will it impact comments in localized versions?
+Answer: No, changes to the master locale entry do not affect the comments or discussions in localized versions.
+
+Question: Can I disable the comments feature for specific fields or entries?
+Answer: No, currently, the comments feature cannot be disabled for specific fields or entries.
+
+Question: What happens to old discussions after they are resolved?
+Answer: Resolved discussions remain accessible in the
+Resolved
+section of the
+Discussions
+tab for future reference. For more information, refer to the
+View Discussions Timeline
+document.
+
+Question: What happens to comments if an entry is deleted?
+Answer: If an entry is deleted, all associated comments and discussions are permanently removed. While you can restore the entry from the Trash, the previous discussions cannot be recovered. For more information, refer to the
+Edit or Delete a Comment
+document.
+
+Question: What are Entry Variants in Contentstack?
+Answer: Entry Variants allow you to create different versions of an entry based on specific criteria, such as different languages, regions, or user preferences. This feature helps manage diverse content within the same entry structure.
+Learn more about
+Entry Variants
+.
+
+Question: How do I create Entry Variants?
+Answer: To create Entry Variants, go to the
+Entries
+section within your stack. When creating or editing an entry, you can create entry variants by selecting a variant from the “Variants” dropdown and updating the content specific to the selected variant.
+Learn more about
+creating entry variants
+.
+
+Question: Can I use Entry Variants with all content types?
+Answer: Yes, you can create Entry Variants for all content type entries available in your stack as long as your content type is linked to variant groups.
+Learn to
+manage variant groups
+.
+
+Question: How do I switch between Entry Variants?
+Answer: You can switch between Entry Variants using the “Variants” dropdown menu available in the entry editor. Select the desired variant to view or edit it.
+
+Question: Are there any limitations when using Entry Variants?
+Answer: Yes, some limitations include the Taxonomy not supporting the Variants feature and that you cannot create, delete, or edit the title and description of variant groups or variants within the stack.
+Note:
+Variant Groups correspond to the
+experiences
+created within your Personalize projects.
+Learn more about the
+limitations for entry variants
+.
+
+Question: Can I localize Entry Variants?
+Answer: No, you cannot directly localize an entry variant. However, you can create an entry variant specifically for a localized language.
+To do this, select a localized entry first, and then create an entry variant for that language. This allows you to manage content variations for different languages.
+
+Question: How do I manage versions of Entry Variants?
+Answer: Managing versions of Entry Variants can be more complex than standard entries. Use the version history feature to track changes and revert to previous versions as needed.
+Learn more about
+managing versions of entry variants
+.
+
+Question: Can I publish entry variants independently?
+Answer: Yes, each entry variant can be published independently, allowing you to control which variants are live at any given time.
+Learn more about
+publishing entry variants
+.
+
+Question: How does publishing affect other variants of the same entry?
+Answer: Publishing one entry variant does not impact the published status of other entry variants for the same entry. Each entry variant's status is managed separately.
+Learn more about
+publishing entry variants
+.
+
+Question: How does language-specific publishing work for entry variants?
+Answer: You can publish entry variants in all the available languages of your stack. However, an entry variant can only be created for a language if the base entry is localized for that particular language.
+Learn more about
+how publishing works with entry variants
+.
+
+Question: Can I unpublish an entry variant?
+Answer: Yes, unpublishing an entry variant will remove it from public view, while other published entry variants of the same entry remain unaffected.
+Learn more about
+unpublishing entry variants
+.
+
+Question: Can I publish all entry variants at once?
+Answer: Yes, you can select entry variants from the entries list page and bulk publish them.
+Learn more about
+how publishing works with entry variants
+.
+
+Question: How many maximum environments can be created for a stack?
+Answer: Please refer to our
+Fair Use Policy
+for the number of
+Environments
+allowed per
+Stack
+, or contact Sales or
+Support
+team.
+
+Question: While setting up an environment, why do you ask for base URL?
+Answer: The
+base URL
+is the consistent part of the destination’s web address. It helps Contentstack to identify the destination to which you will publish the content, for example,
+www.yourdomain.com.
+
+Question: Should I need to enter a base URL while setting up an environment for my mobile application?
+Answer: No, you do not need to enter the base URL while setting up the environment for your mobile application. This is because the apps fetch content directly from Contentstack via
+APIs
+.
+
+Question: How do you sandbox an extension iframe?
+Answer: To separate an extension from Contentstack, we make use of the
+HTML5 sandbox attribute
+on the iframe. And, the following sandbox flags are enabled:
+allow-scripts
+: This flag re-enables an extension to run JavaScript in its own sandbox
+allow-popups
+: Use this flag to enable your extension to open pop-ups.
+allow-popups-to-escape-sandbox
+: This flag allows the sandboxed document to open new windows without imposing any sandbox-specific restrictions on them.
+Note:
+For external hosting of extensions, the
+allow-same-origin
+option will be enabled, where the origin refers to the domain where you've hosted the extensions. Also, ensure that the response header has the exact origin URL passed in the request header.
+For Contentstack-hosted extensions, the iframe's origin will be null as we don't enable the
+allow-same-origin
+flag.
+
+Question: Is hosting extensions on HTTPS a mandatory process?
+Answer: Yes, it is mandatory to host your extensions on HTTPS as we do not allow users to reference non-HTTPS URLs (i.e., http://) with the exception of Localhost URLs (http://localhost) which are used for development purposes.
+If you plan to serve your extension from localhost, block mixed content protection in
+Chrome
+and
+Firefox
+.
+
+Question: Do we need to make use of the CORS mechanism?
+Answer: Since an extension is run in a sandboxed iframe, it receives the origin null. Because of this reason, custom web fonts do not work as expected. In order to overcome this, you need to configure your servers to send the headers:
+Access-Control-Allow-Origin null
+or
+Access-Control-Allow-Origin
+
+Question: Can I customize Contentstack’s field appearance?
+Answer: Yes, but only of the fields that you create using Contentstack’s UI
+Extensions
+. You cannot customize the appearance of Contentstack’s default fields
+
+Question: How can I install an Extension?
+Answer: There are two ways to install Extensions in Contentstack:
+Via
+Contentstack UI
+.
+Using
+Extensions Content Management APIs
+Note:
+Extensions are going to be deprecated soon. We encourage you to visit our
+Marketplace
+to get a complete list of available apps.
+
+Question: What are common use cases for Extensions?
+Answer: Color picker
+YouTube video selector
+Key-value pair fields
+Product catalog viewer
+Salesforce
+/
+Marketo
+data fetcher
+For more experience use cases, read
+All Contentstack Experience Extensions
+document.
+The possibilities are endless. You can create a custom field and/or integrate the field with third-party apps.
+
+Question: Are there any naming conventions to be followed when creating extensions?
+Answer: No, there are no validation rules to be followed when choosing extension names. But do try to keep it short because long names can break the layout.
+
+Question: When creating a particular content type, can I use multiple Extension fields? If yes, is there any limitation to it?
+Answer: Yes, you can use multiple
+extensions
+in a
+content type
+. There are no limitations pertaining to using Extension fields. However, for content types, we have a field limitation of 100, which is applicable to Extension fields too.
+
+Question: Are there any limitations to using extensions in general?
+Answer: Yes, there are certain limitations to using extensions. They are as follows:
+Size:
+The maximum size of an extension is
+500 KB
+Title:
+The title of an extension cannot exceed
+256
+characters
+Stack limit:
+At most
+50
+extensions can be installed in a stack.
+Config file size:
+The size limit of an extension’s configuration file is
+10 KB
+JSON data type size:
+The maximum size limit of the JSON Data Type is
+10 KB
+Browser-support:
+Internally hosted extensions are not supported on Internet Explorer and Microsoft Edge as they lack support for the <iframe>
+srcdoc
+attribute.
+
+Question: Is it possible to externally configure the code of an Extension?
+Answer: Yes, it is possible to add configuration externally on a stack-level. Refer to our
+API documentation
+on configuration from the Extension SDK during runtime.
+To understand how this is done, refer to the
+Create New Custom Field
+article.
+
+Question: How do you debug extensions?
+Answer: As the extension runs on the browser, a simple console debugger can be used to debug extensions.
+
+Question: What happens if I deploy a broken extension?
+Answer: If any URL defined in
+extension.json
+contains error or is invalid, the extension will not be rendered properly, i.e., it will be broken, and in some cases, it may not show up at all.
+
+Question: What happens with the content once an extension is removed?
+Answer: If you remove an installed extension, all the content that has been stored using the extension field will remain unaffected until another extension with the same UID but different attributes is used instead of the deleted extension in the content type.
+
+Question: Does the extension field accept multiple values?
+Answer: It accepts multiple values if you enable the “
+Multiple
+” property while setting up the extension. To enable "Multiple," edit the extension, and check the
+Multiple
+checkbox on the extension configuration page.
+
+Question: What are the supported data types for an Extension? How do we decide which data type to select?
+Answer: The supported data types for an Extension field are: Text, Boolean, JSON, Number, and Date. Depending on the data that you want your extension field to consume, you can select any one of the data types.
+
+Question: I updated an extension recently. Since then, the field shows an error in the entry page. What could have gone wrong?
+Answer: When you update an extension, it is important to update the content type too (within which the extension is being used) by simply saving the content type once again. This integrates the updated changes in the extension with the content type.
+
+Question: What happens when an extension is deleted?
+Answer: When an extension is deleted, the following things may happen:
+The entry data for the field remains unchanged, unless another extension with the same UID as of the deleted extension but with changed data type or the “
+Multiple
+” setting is added.
+The entry data for the field will not be rendered in UI.
+Tip:
+If you need to render the entry data unchanged, you need to add a new extension with the same UID as of the deleted extension, with the same data type and set the “Multiple” option.
+
+Question: I have updated an extension. Will it affect any existing entries?
+Answer: No, it will not affect any existing entries.
+
+Question: Can an extension destroy existing content?
+Answer: Theoretically, yes. An extension can affect your content owing to the fact that they have access to all the content that the user running the extension has. It is advisable that users take utmost care while building/using extensions to avoid any kind of data loss.
+
+Question: Can I add custom validations to the fields of a content type?
+Answer: Yes. You can add custom validations to “
+Single Line Textbox
+” and “
+Multi Line textbox
+” fields by setting the “
+Validations (Regex)
+” property.
+
+Question: Are there any examples of validations that you can set on a field?
+Answer: The “
+Validation (Regex)
+” field property is available for “
+Single Line Textbox
+” and “
+Multi Line textbox
+” fields. You can find common examples of validations in our
+documentation
+. Since you can add validations using regex, learning
+how regex works
+might be helpful.
+
+Question: Can I define multiple validation rules to a single field?
+Answer: No, you can only define one validation rule for a single field.
+
+Question: How do I add a validation for an email address for a field?
+Answer: Validations can be added to “
+Single Line Textbox
+” and “
+Multi Line textbox
+” fields using regex (regular expressions). When
+creating a content type
+, perform the following steps to add regex validation to a field in order to check for email addresses:
+Edit the required content type. Click on the “Email” field. This opens the
+Edit Properties
+window of the field.
+Now, enter the following regex value in the “
+Validation (Regex)
+” property. This will validate email addresses:
+[a-z0-9!#$%&'*+=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?
+
+Question: Can I restrict users from uploading some image types? I want my users to be able to upload only PNG files and not JPEG or any other image type.
+Answer: Yes, you can set validations on the “
+File
+” field to restrict users from uploading certain file types. To do this, click the “File” field to open its properties. Then, use the “
+Allow file type(s)
+” property to allow the upload of specific file types.
+
+Question: What are the common use cases for Global Fields?
+Answer: Modeling
+“Address”
+content
+: Suppose user assigned with the “
+developer
+” role  wants to use a group of address fields across several content types. In this case, creating an “Address” Global field makes sense. It would comprise fields such as “House No,” “Apartment Name,” “Street Name,” “City,” and “Postal Code.”
+Adding SEO metadata fields
+: Consider a situation where a developer needs to use a group of fields that contain SEO metadata for every entry present across different content types. In such a scenario, the fields that relate to SEO (for example, “Meta Title”, “Meta Description”, and “Meta Keywords”) can be added to a single Global field named “SEO Metadata”. You can now use these metadata fields across multiple content types by referring to the “SEO Metadata” Global field.
+
+Question: How many fields can I add within the Global field?
+Answer: You can add a maximum of
+100
+fields to the Global field. However, while adding the Global field to your content type, you need to keep in mind that the content type only allows you to add a maximum of
+100
+fields to it.
+
+Question: When creating a particular content type, can I add multiple Global fields? If yes, is there any limitation to it?
+Answer: Yes, you can add multiple Global fields to a content type. However, the maximum number of Global fields that can be added in a single content type is
+25
+. Refer to the
+limitations
+section for more details.
+
+Question: Can I refer to the same Global field multiple times within the content type?
+Answer: Yes, you can refer to the same Global field multiple times within the same content type. This allows you to reuse the Global field schema across different sections of your content types.
+
+Question: Does the Global field accept multiple values?
+Answer: Global field accepts multiple values if you enable the “
+Multiple
+” property while adding it to the content type. To enable “Multiple,” edit the content type, select the Global field, and check the “Multiple” checkbox in the
+Edit Properties
+section on the right-hand side.
+
+Question: What happens when a Global field is deleted?
+Answer: You might end up losing data if you do the following:
+Delete a Global field
+: When you delete a Global field from an existing content type, the data of that field will be lost in all the existing entries.
+Delete a field within a Global field
+: When you delete a field nested within a Global field, the data of that field will be lost in all the existing entries.
+
+Question: What happens when a Global field is updated?
+Answer: When you add a new field to the content schema of a
+Global field
+and save your changes, the new field instantly appears in all the existing entries that contain that Global field.
+
+Question: What is the difference between Global field and Reference field?
+Answer: The
+Reference
+field allows you to create references to entries of the same content type or other content type(s). On the other hand, the
+Global
+field is just a reusable set of fields that can be created once and used across multiple content types. The value for this field needs to be created separately for each entry.
+
+Question: What type of Reference field can I add to my Global field?
+Answer: By default, Contentstack allows you to add only those
+Reference
+fields that refer to multiple content types to your Global fields. This means that when you use a Reference field within your Global field, you can create references to entries of multiple content types.
+
+Question: How to use the GraphiQL explorer for your stack?
+Answer: To try out Contentstack's
+GraphQL Content Delivery API
+, access the GraphQL explorer through the following endpoint:
+https://www.contentstack.com/docs/developers/apis/graphql-content-delivery-api/explorer/?api_key=blt95a0a7afb9613f51&access_token=csd2e15b5bad2bf983e44dca27&environment=production
+You can apply your own stack details to test the GraphQL API requests over your stack.
+
+Question: What are the GraphQL System-defined Fields?
+Answer: Each
+entry
+or
+asset
+associated with a
+content type
+has its own set of system-defined fields. These fields provide additional information about the entity.
+Let’s understand the different system fields generated by Contentstack’s GraphQL Content Delivery API for each entry or asset:
+System Fields
+Description
+uid
+(String)
+Represents the unique ID of an entry or asset
+version
+(Integer)
+Determines the version number assigned to an entry or asset
+content_type_uid
+(String)
+Determines the unique ID of the content type to which the entry or asset belongs
+locale
+(String)
+Determines the language in which the entry has been localized
+publish_details
+Determines the following publishing details for an entry or asset:
+environment
+(String): Represents the publishing environment
+locale
+(String): Represents the publishing locale
+time
+(DateTime): Represents the publishing date and time
+user
+(String): Represents the publisher
+created_at
+(DateTime)
+Determines the date and time at which the entry or asset was created
+updated_at
+(DateTime)
+Determines the date and time at which the entry or asset was last modified
+created_by
+(String)
+Represents the user who created the entry or added the asset
+updated_by
+(String)
+Represents the user who last modified the entry or asset
+tags
+(String)
+Determines the specific tags assigned to an entry or asset
+
+Question: How do I fetch data of singleton content types without passing the entry UID?
+Answer: To avoid the hassles of passing specific entry UIDs while fetching an entry from a
+singleton
+content type, you can prefix the content type UID with
+all_
+, e.g.,
+all_header
+. You can query singleton content types in the same way as you query content types with
+multiple entries
+.
+Consider the following query that attempts to fetch an entry of the
+Header
+singleton content type, which stores website header content:
+query {
+  all_header { # Where the header content type is of type singleton.
+   total
+   items {
+    title
+   }
+  }
+}
+Note
+: All the filters and ordering functions will be available to the user. They would work the same as how you query a content type with multiple entries.
+
+Question: Why does the "where" filter not throw an error when I query a field that does not exist in the current schema?
+Answer: When an API request hits the Contentstack server, internally the
+{content_type_uid}Where
+filter is assigned a
+JSON scalar
+value. Since the where filter accepts JSON scalar input types, you can create filters on keys that may not exist on the current content type's schema. Contentstack processes your API requests without any errors.
+
+Question: What restricted special characters should I avoid while defining names for GraphQL entities such as content types, fields, etc.?
+Answer: In Contentstack's GraphQL documents, you assign names to several entities, such as operations, content types, fields, variables, and fragments. All the GraphQL names you define must follow the same grammatical form of
+/[_A-Za-z][_0-9A-Za-z]*/
+.
+Additional Resource
+: You can refer to the GraphQL documentation to learn more about the
+naming specifications
+.
+The aforementioned naming convention means if you have a content type name that starts with a number, it will end up throwing the following error:
+{
+  "errors": [
+    {
+      "message": "Names must match /^[_a-zA-Z][_a-zA-Z0-9]*$/ but \"{content_type_name}\" does not."
+    },
+    ...
+  ]
+}
+Tip
+: To prevent typename collisions, you can avoid using special characters while naming content types or fields.
+
+Question: What is the MAX_DOCUMENT_LIMIT_EXCEEDED error and how to resolve it?
+Answer: Contentstack returns the
+MAX_DOCUMENT_LIMIT_EXCEEDED
+error message when a GraphQL API request attempts to fetch more than 7,500 documents (assets, entries, their referenced assets and entries, etc.).
+To resolve this error, you can reduce the total number of referenced items being queried or pass the skip or limit parameters while querying referenced items. Learn more about
+fetching referenced entries or assets
+.
+
+Question: If I query three different content types in a single GraphQL API request, does it count as three queries or one?
+Answer: Contentstack counts each GraphQL query as
+one
+irrespective of the number of content types queried in it. Similarly, the rate limit remains the same whether you query one or more than one content types in a single API request.
+
+Question: Can I migrate content from existing HTML-based RTE to the new JSON RTE?
+Answer: Yes, you can migrate content from existing HTML-based RTE to the new JSON RTE using CLI. Please refer to our
+migration guide
+for more details.
+
+Question: Can I migrate content from HTML-based RTE to JSON RTE in bulk?
+Answer: Yes, Contentstack allows you to migrate your rich text content from your existing HTML-based RTE fields to the new JSON RTE fields for all entries of a content type in just a few minutes. Please refer to our
+migration guide
+for more details.
+
+Question: How can I add class HTML tags in the new JSON RTE?
+Answer: You can use the
+Properties
+option in
+More options
+to add tags in the JSON RTE.
+
+Question: Can I get a HTML response for my JSON RTE?
+Answer: Yes, you can add the
+include_html
+parameter while fetching an entry to get a HTML response. Please refer to the following API requests in our CMA API documentation:
+Create a content type with JSON RTE
+Create an entry with JSON RTE
+Update an entry with JSON RTE
+
+Question: Do you have any prebuilt plugins for the JSON Rich Text Editor?
+Answer: Yes, we have
+three
+prebuilt plugins namely Highlight, Info Panel, and Word Count. For more information, refer to our
+Use Prebuilt JSON RTE Plugins
+documentation.
+
+Question: Can I create plugins for the HTML-based rich text editor?
+Answer: No, you cannot create plugins for the HTML based editor. These plugins are only available for the JSON Rich Text Editor in the
+new Contentstack user interface
+.
+
+Question: Can I create customized JSON RTE plugins?
+Answer: Yes, you can create customized plugins for your JSON Rich Text Editor. For more information, refer to our
+Create New JSON RTE Plugin
+documentation.
+
+Question: Is it necessary to host the JSON RTE plugin on an external server?
+Answer: No, you can host your plugin in Contentstack by uploading the
+plugin.system.js
+file in Assets and using this file URL to add the plugin to a stack. For more information, refer to the
+Host the Custom JSON RTE Plugin
+section in our
+Create New JSON RTE Plugin
+documentation.
+
+Question: Can I change the source code for the prebuilt JSON RTE plugins?
+Answer: Yes, you can clone the
+extensions
+repository and change the source code for the JSON RTE plugin you want to update. You’ll then need to host this new code and add it to your stack. For more information, refer to our
+Create New JSON RTE Plugin
+documentation.
+
+Question: Can I create JSON RTE plugins via API?
+Answer: Yes, you can create, update, or delete plugins via API. Please check our
+JSON RTE Plugins CMA request
+collection.
+
+Question: Can I test my plugin locally?
+Answer: Yes, you can test your plugin on a local host. For more information, refer to the
+Test the JSON RTE Plugin
+section in our
+Create New JSON RTE Plugin
+documentation.
+
+Question: What are Content Type Labels in Contentstack?
+Answer: Labels
+in Contentstack help you organize content types into logical folders, making it easier to manage and access them.
+
+Question: Why should I use labels for content types?
+Answer: Labels
+make it easier to organize content types based on teams, projects, or any specific criteria. This improves navigation and simplifies content type management.
+
+Question: Are labels branch-specific?
+Answer: Yes, labels are
+branch-specific
+. A label created in one branch (e.g., development) can only be applied to content types within that branch.
+
+Question: Are labels private to users?
+Answer: No,
+labels
+are not private. The labels you create for a particular
+stack
+are visible to all stack
+users
+.
+
+Question: Can I edit or delete a label?
+Answer: Yes, you can edit or delete labels by accessing the
+Manage Labels
+modal. You can rename a label, nest it under another label, or delete it if no longer needed.
+
+Question: Can I assign multiple labels to a single content type?
+Answer: Yes, you can assign multiple labels to a content type. For more details, refer to the
+About Labels
+documentation.
+
+Question: What happens to content types without labels?
+Answer: Content types without labels are listed under
+[Unlabeled]
+in the
+Content Type Views
+section on the
+Entry List
+page. For more details, refer to the
+About Labels
+documentation.
+
+Question: Can labels be exported or imported with content types?
+Answer: No, labels are not included when exporting or importing content types.
+
+Question: Can I manage labels in Contentstack?
+Answer: Yes, you can create, edit, rename, nest, and delete labels in Contentstack. For detailed instructions, refer to the
+Manage Labels
+documentation.
+
+Question: Will my site have downtime for new deployments?
+Answer: No. Your last successful deployment will remain active until it is replaced by a subsequent successful deployment. However, redeploying your site will clear the CDN cache for your site, so previously cached pages will be served as uncached requests the first time they are accessed.
+
+Question: Does Launch support custom domains?
+Answer: Yes.
+Custom domains
+may be added and configured in each environment’s settings.
+
+Question: Does Launch support serverless functions?
+Answer: Yes.
+Launch
+deploys server-side functionality as serverless functions. This includes SSR-rendered pages, and
+Cloud Functions
+.
+
+Question: Does Launch support hosting static websites?
+Answer: Yes. To deploy a
+static site
+, follow the process specified in your framework code for static site generation (SSG) rendering.
+
+Question: Does Launch support Edge Functions?
+Answer: Yes. You can execute your code in proximity to your user’s location before a request is processed using
+Edge Functions
+in Contentstack Launch.
+
+Question: Does Contentstack Launch support forwarding project logs to specific endpoints?
+Answer: Yes. The
+Log Targets
+feature in Contentstack Launch allows you to forward the logs produced by
+Launch Cloud Functions
+or by
+Launch-supported frameworks
+to third-party monitoring services that support GRPC OTLP endpoint.
+
+Question: What frameworks can be used to deploy on Launch?
+Answer: You can find the frameworks supported by Launch in the
+Launch Framework Support Matrix
+.
+
+Question: Does Launch support read and write operations to the filesystem at the runtime?
+Answer: Launch runtime operates in a read-only file system, except for the designated
+/tmp
+directory, which facilitates
+write
+operations. The
+/tmp
+directory is a temporary file system accessible to every Launch serverless runtime, offering up to
+500 MB
+of storage.
+Note
+: The data stored in
+/tmp
+is non-persistent and is automatically deleted upon request completion.
+
+Question: Can I integrate Launch with other services and products?
+Answer: Yes.
+Automate
+includes triggers and actions for common Launch activities. Launch also includes
+deploy hooks
+functionality, allowing you to trigger rebuilds via a URL. Launch can also use the Marketplace app to set up an SSO at the edge.
+
+Question: What support can I expect when hosting my site on Launch?
+Answer: Launch
+technical support is offered through the same technical support channels used for all other Contentstack products.
+
+Question: What regions is Launch available in?
+Answer: Launch is available in
+AWS NA
+,
+AWS EU
+,
+Azure NA
+,
+Azure EU
+, and
+GCP NA
+regions.
+
+Question: Will my site have a downtime when migrating to Launch from a different hosting provider?
+Answer: Depending upon your specific architecture and change process, migrating your existing site to Launch can be achieved with zero or minimal downtime.
+
+Question: What Git providers does Launch support?
+Answer: Launch currently supports deploying sites via
+GitHub
+and direct
+zip file uploads
+. GitLab support will be available shortly.
+
+Question: Does Launch support CI/CD?
+Answer: Yes. Launch can be configured to
+automatically redeploy
+when code updates are committed in GitHub and when webhooks are accessed. Launch commands are also available via
+Contentstack’s CLI
+.
+
+Question: Does Launch support deploying code automatically?
+Answer: Yes.
+Automatic deployments
+can be configured in your environment’s settings screen.
+
+Question: Does Launch support creating test environments?
+Answer: Yes. Each Launch project includes 5 environments by default, which you can use to deploy environments for staging, testing, content review, and more.
+
+Question: How do I debug my websites on Launch?
+Answer: Launch features deployment and server logs to help you troubleshoot deployments and functionality. Serverless functions can also be tested locally.
+
+Question: Does Launch need access to my GitHub account?
+Answer: If you wish to deploy sites to Launch directly from GitHub, then you must authenticate with your GitHub account. However, Launch also supports deployments directly from a zip file upload, which does not require GitHub access.
+
+Question: Does Launch support bulk publishing/deployments?
+Answer: Bulk
+site
+deployments
+can
+be
+achieved
+via
+the
+CLI
+and
+through
+local
+scripting.
+
+Question: Can I run a Docker container on Launch?
+Answer: Launch is a front-end hosting and deployment platform for websites built on the Contentstack CMS instantly, but it
+cannot
+run Docker containers.
+Please refer to this
+documentation
+, for more information about Docker containers and why Launch does not support them.
+
+Question: What NodeJS Runtime version does Launch support?
+Answer: Currently, Launch supports Node.js versions 18.x and 20.x for running website builds during deployment. For more information, please refer to the
+supported Node.js versions
+.
+
+Question: Can Launch be used for mobile?
+Answer: Launch cannot be used for native mobile apps, such as those installed from an app store. However, you can use Launch to host mobile-friendly and responsive websites or web apps. Additionally, it can be used to support backend needs, such as building APIs that your mobile app can access.
+
+Question: Does Contentstack provide the ability to create right-to-left content for languages such as Arabic and Hebrew?
+Answer: Contentstack supports
+writing or adding content from right to left (RTL)
+using the JSON Rich Text Editor streamlining the process of content management and editing. However, for other text fields, users can paste Arabic and Hebrew content copied from any source file. Learn how
+localization
+works.
+
+Question: Does Contentstack provide translation service?
+Answer: No, Contentstack does not provide any translation service.
+
+Question: How can I change the default language of a stack?
+Answer: The default language of a stack is known as the master language of a stack. Once it is set while creating a stack, it cannot be changed. Read more about
+master language.
+
+Question: If a user publishes an entry of a master language to another language where it has not been published yet, will the system automatically save the entry as a localized entry for that other language?
+Answer: No. You need to perform the following steps to localize an entry.
+Select the language using the language selector option, say
+French - France
+.
+The entry page for ‘French - France’ shows an Unlocalized, unpublished copy of the main entry in Master language.
+Now, make changes in this entry in order to localize it in ‘French - France’, and click on
+Save
+or
+Publish
+.
+This will create a new copy of the same entry. This new copy will then cease to fetch data from the main entry in master language, and the entry will be considered as localized in ‘French - France’.
+
+Question: Can I retrieve published content from the fallback language while using Contentstack’s Content Delivery API?
+Answer: Yes, you can retrieve content from the fallback language version of an entry or asset if the current localized version hasn’t been published. Pass the
+include_fallback=true
+query parameter to fetch the published version from the fallback language. Learn more about how the fallback logic works while
+retrieving published content
+.
+You can also refer to our Content Delivery API documentation on
+entries
+and
+assets
+to understand how you can fetch fallback content for published entries.
+
+Question: What happens if the fallback language for the locale I specify in the API request is the master language itself?
+Answer: If the fallback language for the specified locale is the master language itself, then the
+include_fallback:true
+query parameter is rendered inapplicable.
+
+Question: How can I set up the Live Preview feature?
+Answer: To set up
+Live Preview
+, you need to first configure the feature for the website for which you want to preview content. Once configured, you can enable Live Preview for the stack that holds your website content through the stack’s “Settings”.
+Learn how to
+Set up Live Preview for your website
+and
+enable the feature within your stack
+.
+
+Question: Do I need to save or publish the entry to preview my content?
+Answer: No, you do not need to save or publish your entry to preview content. The changes you make to an entry reflect in the preview window in real-time.
+
+Question: Can I preview content without an HTTP-hosted website?
+Answer: Yes, you can preview the content of your website even if the server is running on localhost.
+
+Question: Does Live Preview support multi-level references?
+Answer: Yes, the functionality for multi-level references is expected to work seamlessly in Live Preview 2.0.
+
+Question: What is the difference between management tokens and authtokens?
+Answer: Both management token and authtoken give you read-write access to a stack and you can use them to make authorized
+CMA
+requests. However, an
+authtoken
+is a user-specific token, which means that your personal user details are attached to every API request that you make using the “Auth Token.”
+Management tokens
+, on the other hand, are stack-level tokens with no users attached to them. Since they are not personal tokens, no role-specific permissions are applicable to them.
+Learn more about the
+different types of tokens
+to get a detailed information about tokens
+
+Question: Is there a maximum limit to the management tokens that can be created in a stack?
+Answer: There is a maximum limit of
+10
+valid tokens that can exist per stack at a time, to execute CMA requests. If you already have 10 valid tokens, creating a new management token will automatically cause the oldest management token to expire without warning.
+Learn more about the
+limitations
+on the use of management tokens.
+
+Question: Can developers generate management tokens?
+Answer: No, only the
+admin
+and
+owner
+of a stack can
+generate management tokens
+.
+
+Question: Can management tokens be used to create content?
+Answer: Yes, management tokens can be used to create, read, update, and delete published as well as unpublished (draft) content of your stack, irrespective of the publishing environment.
+
+Question: Can management tokens have an expiration limit?
+Answer: Yes, you can set an expiration limit for the management token of your stack. Alternatively, you can also opt to generate a management token without an expiry date.
+Learn more about setting expiration limits while
+generating a management token
+.
+
+Question: What is Contentstack Marketplace?
+Answer: Contentstack Marketplace is Contentstack's very own app distribution platform. Customers can easily expand the capabilities of their Contentstack web application using our
+Marketplace apps
+.
+
+Question: What are Apps?
+Answer: Apps are a new type of integration provided by Contentstack that allows you to connect quickly with third party services.
+Apps
+are enhanced versions of extensions and can be
+installed
+and
+uninstalled
+easily.
+We support two types of apps, organization apps and stack apps.
+
+Question: What is the difference between organization apps and stack apps?
+Answer: Organization Apps:
+Organization apps utilize organization-level scopes and permissions.
+This means organization apps can manage users and roles at organization level. These apps can target SCIM functionality at organization level.
+Organization apps use OAuth to authorize users for user tokens.
+Stack Apps:
+Stack apps utilize stack-level scopes and permissions.
+This means stack apps can manage UI experiences at stack level.
+
+Question: Who can install apps from the Marketplace?
+Answer: Both
+Organization Admins
+and
+Stack Admins
+can install relevant
+Marketplace apps
+.
+Organization Apps
+can be installed by organization admins only.
+Stack Apps
+can be installed by organization admins and stack admins only.
+
+Question: I am an admin but why am I not able to install an application?
+Answer: Make sure you are the stack admin of the stack where you want to install the app. For organization admins, check if you are a member of the stack where you want to install the app.
+
+Question: How are apps different from extensions?
+Answer: Marketplace apps
+are enhanced versions of extensions. Using extensions is currently a manual, and developer-centric experience. Whereas
+Marketplace apps
+are quite easy to install and can be used by any audience regardless of your expertise.
+Apps also allow you to overcome few limitations of extensions.
+
+Question: Can Stack Developers, Content Managers install apps from the Marketplace?
+Answer: No,  Stack Developers and Content Managers cannot install apps from the Marketplace.
+They can request app installation from stack admins using the app request feature in the marketplace.
+
+Question: How does app request feature work?
+Answer: Non Organization/Stack Owners/Admins can request for Marketplace app installation in the stack of their choice. The request is sent to the admins.
+Admins can view these requests in the
+Marketplace > Manage > App Requests
+section and then decide whether to install the app or reject the request.
+
+Question: What are Starters? How can I use starters?
+Answer: Contentstack Marketplace offers easy, quick installation and hosting of starter apps.
+Starters in Marketplace
+are designed to help beginners learn how to build websites using Contentstack.
+Navigate to the Contentstack Marketplace page, then go to the Starters section to install the app of your choice.
+
+Question: I’m interested in developing an app for Contentstack. How should I get started?
+Answer: Contact the Marketplace
+Support
+team to develop an app.
+
+Question: How can I add a custom filter?
+Answer: You can add custom filters for retrieving content via API calls. When executing the GET calls to retrieve content, you can pass certain queries as parameters. These queries act as filters and fetch all the content that satisfy the specified query expression.
+To know more about the queries that can be used to filter out content, refer the
+Queries
+section of our API docs.
+
+Question: How does caching work with Contentstack?
+Answer: Contentstack uses
+CDN
+which helps to deliver content and implements caching, wherein the CDN maintains cached copies of the resource that have been accessed via API calls and make them available to users for future requests.
+
+Question: Which framework do you use for websites?
+Answer: Contentstack uses two frameworks for websites –
+Contentstack Express
+and
+Contentstack SDK
+.
+
+Question: What is the right way to get the stack API Key and the Authtoken? Is the Authtoken unique per user?
+Answer: Yes, the Authtoken is unique per user. The authtoken is very important as it is required to perform the write API calls.
+To retrieve the API Key of your stack, perform the steps given below after logging into your
+Contentstack account
+:
+In your stack, click the
+Settings
+icon on the left navigation panel.
+By default, you will be on the
+Stack
+option. At the right-hand side of the page, you will find the
+API Credentials
+section under which you will get the
+API Key
+for your stack.
+To retrieve the
+Authtoken
+, you need to log in to your Contentstack account via the login call of the
+User Session
+API Request. And, in the response body of the call, you will find your Authtoken.
+
+Question: Which SDKs do you provide?
+Answer: We provide the following SDKs:
+Android
+iOS
+React Native
+NodeJS
+Java
+JavaScript
+PHP
+.NET
+Ruby
+Python
+Dart
+
+Question: How do I add CSS styles to an image using Markdown?
+Answer: Markdown is a markup language with plain text formatting syntax. It does not support inline styling (CSS). However, you can input HTML in Markdown. Here's the
+official Markdown documentation on inline HTML
+.
+
+Question: How can I import data to Contentstack?
+Answer: You can import content types as well as entries into your stacks in Contentstack. Our documentation provides in-depth guides and video tutorials on how to import
+content types
+and
+entries
+.
+
+Question: How to handle routing?
+Answer: If you are using Contentstack’s web framework, routing is handled by the router that is available in the app.js file or the custom plugin of your framework. Learn more about
+how routing works
+with Contentstack.
+
+Question: What is unique ID? I see it everywhere.
+Answer: A unique identifier (UID) is an alphanumeric string that is associated with an entity (content type, entry, asset, or field) in Contentstack. UIDs make it possible to address/identify that entity so that it can be accessed and interacted with.
+
+Question: Is there a way to integrate Contentstack with other external apps?
+Answer: Yes. many external applications can be integrated with Contentstack. Check out the
+external integrations
+page to learn more.
+
+Question: Can I add my custom logic to Contentstack?
+Answer: Yes. Through plugins and hooks, you can add custom logic to extend the functionality of Contentstack. Learn
+how this works.
+
+Question: How many levels of nested references can I publish when publishing a single entry or multiple entries?
+Answer: You can publish nested referenced items up to a default depth of
+5
+levels at a time, for both single and bulk publishing, and can vary as per your organization’s plan.
+
+Question: How many locales can I select when publishing a single entry or bulk entries?
+Answer: You can only select a maximum of
+50
+locales in which you want to publish content.
+
+Question: How many environments can I select when publishing a single entry or bulk entries?
+Answer: You can only select a maximum of
+50
+environments to which you want to publish content.
+
+Question: Can I schedule the publishing of nested referenced items?
+Answer: Yes, the "Nested Reference Publishing" feature supports scheduled publishing options.
+
+Question: Can we select and publish specific child entries of a parent entry?
+Answer: No, you cannot selectively publish specific child entries of a parent entry.
+
+Question: Can I view the nested references while publishing an entry?
+Answer: Yes, you get a tree view of all nested items while publishing an entry.
+
+Question: How many parent entries can I select when performing bulk publishing of entries?
+Answer: You can select a maximum of
+100
+parent entries when publishing entries in bulk.
+
+Question: While bulk publishing, can I view nested references of each parent entry?
+Answer: No, while bulk publishing entries, you cannot view the nested references for any of the selected parent entries.
+
+Question: Can I check the status of all my published tasks?
+Answer: Yes, you can check the status of all published tasks in the
+Publish Queue
+.
+
+Question: What is an organization?
+Answer: Organization is specifically designed for administrators to simplify the process of managing stacks and permissions of a group or company. Organization encapsulates all users, stacks and all the resources within stacks. It allows you to manage roles and permissions for the users and stacks of your account and enables smoother collaboration between the users.  For more information, read
+Work with Organizations
+documentation.
+
+Question: Can I transfer the ownership of my organization? If yes, how?
+Answer: Yes, you can. To do so, log in to your
+Contentstack account
+and perform the steps given below:
+Click on the “
+ORGANIZATION”
+drop-down on the header and select the Organization you want to access
+Click on the “Org Admin” icon on the left. This will open the “Settings” page.
+In the “Organization Info” section, click on the “Transfer Ownership” button on the right-hand side.
+Enter the email ID of the user to whom you wish to transfer the Organization"s ownership and click on “
+Transfer
+”. This will send an email invitation to the user to accept the ownership of the organization. If the user does not receive the invitation, you can resend the invitation by clicking on “
+Resend
+”.
+Once the invited user accepts the ownership invitation, the organization will cease to be under your ownership and you will be assigned the ‘Member’ role.
+Note
+: Only the owner of the organization can transfer the ownership of the organization.
+
+Question: How do I create an organization?
+Answer: To create a new organization, contact the Contentstack support team at
+support@contentstack.com
+.
+
+Question: How do I get the details of an organization?
+Answer: To get the details of an organization, log in to your
+Contentstack account
+and perform the following steps:
+Click on the  "ORGANIZATION" drop-down on the header and select the Organization you want to access.
+Click on the “Org Admin” icon on the left navigation panel.
+This will open the ‘Organization Settings’ page which consists of the details of the organization as shown in the following screenshot:
+Note: Only the Owner and the Admin users can view this info.
+
+Question: How do I delete an organization?
+Answer: You cannot delete an organization. To permanently disable your organization, contact the Contentstack support team at
+support@contentstack.com
+.
+
+Question: How do I get a list of all stacks in my organization?
+Answer: To get a list of all stacks in an organization, log in to your
+Contentstack account
+and perform the steps given below:
+Click on the "ORGANIZATION" drop-down on the header and select the Organization that you want to access.
+Click the “Org Admin” icon on the left navigation panel.
+Click on the
+Stacks
+tab on the left-hand side of the page. This will open the
+Stacks
+page that displays the list of all the stacks that belong to the organization.
+
+Question: How do I invite users to my organization?
+Answer: Only the Owner and the Admin users of the organization has the right to invite users to the organization. To invite users to an organization, log in to your
+Contentstack account
+and perform the steps given below:
+Click on the "ORGANIZATION" drop-down on the header and select the Organization you want to access.
+Click on the “Org Admin” icon on the left navigation panel.
+Click on the
+Users
+tab on the left-hand side of the page. This will open the
+Users
+page that displays the list of users who belong to that organization.
+Click on the
+Invite User
+button on top of the page.
+In the “Invite User” form that opens, enter the following details:
+Under the
+Email
+section, enter the email ID(s) of the user(s) you wish to share the stack with.
+In the
+Organization Roles
+section, you also need to assign a role to the user. You can select either the ‘ADMIN’ or ‘MEMBER’ role.
+In the
+Stack-level permissions
+section, assign stack-specific roles to these users.
+Click on
+Invite
+to send the invitation to the user(s).
+
+Question: How do I get a list of all users in my organization?
+Answer: To get a list of all users in an organization, log in to your
+Contentstack account
+and perform the steps given below:
+Click on the “ORGANIZATION” drop-down on the header and select the Organization that you want to access.
+Click on the “Org Admin” icon on the left navigation panel.
+Click on the
+Users
+tab on the left-hand side of the page. This will open the
+Users Overview
+page that displays the list of users who belong to that organization.
+
+Question: How do I remove a user from my organization?
+Answer: To remove a user from an organization, log in to your
+Contentstack account
+and perform the steps given below:
+Click on the
+ORGANIZATION
+drop-down on the header and select the Organization that you want to access.
+Click on the “Org Admin” icon on the left navigation panel.
+Click on the
+Users
+tab. This will open the
+Users
+page that displays the list of users who belong to that organization.
+Click on the user that you wish to remove and click on the “Remove” icon
+.
+
+Question: What is the difference between roles created within organizations and stacks?
+Answer: In Contentstack, roles can be assigned at two level: Organization-level roles and Stack-level roles.
+While inviting a user to an organization, you can assign Member and Admin roles. These roles define what you can do in the organization. Read more about
+organization roles
+.
+When inviting a user to a stack, you can assign Developer, Content Manager or a custom role. These role define what a user can do within the stack. Read more about
+stack roles
+.
+
+Question: Are there any limits to the number of users or stacks that can be added to an organization?
+Answer: Yes, there are limits to your usage in an organization. These limits depend on the plan that you have subscribed for.
+To get the plan details and usage of your organization, log in to your
+Contentstack account
+and perform the following steps:
+Click on the
+ORGANIZATION
+drop-down on the header and select the Organization that you want to access.
+Click on the “Org Admin” icon on the left navigation panel.
+Click on the
+Plan & Usage
+tab. This will lead you to the
+Plan & Usage
+page that will display the current usage and maximum allowed limit of the current plan’s features, which include stacks, assets, entries, content types, and users, API calls, and bandwidth.
+
+Question: How to update a user role in an organization?
+Answer: To update a user role in an organization, log in to your
+Contentstack account
+and perform the steps given below:
+Click on the
+ORGANIZATION
+drop-down on the header and select the Organization that you want to open.
+Click on the “Org Admin” icon on the left navigation panel.
+Click on the
+Users
+tab on the left-hand side of the page. This will open the
+Users
+page that displays the list of users who belong to that organization.
+Click on the user whose role you wish to update. This will open the ‘User Details’ page.
+Reassign the respective organization roles for the user.
+Click on the
+Update
+button to update the roles of the user(s).
+Note: You need to be the organization owner or be assigned the 'admin' role in order to update the roles of users in an organization.
+
+Question: Where can I find the organization ID?
+Answer: To retrieve the organization ID of an organization, log in to your
+Contentstack account
+and perform the steps given below:
+Click on the
+ORGANIZATION
+drop-down on the header and select the Organization that you want to access.
+Click on the “Org Admin” icon on the left navigation panel.
+By default, the
+Organization Info
+section is opened which displays the name and ID of an Organization.
+
+Question: How to change the name of an organization?
+Answer: You cannot change the name of an organization. In order to do so, please contact our
+Support
+team.
+
+Question: What is the difference between an admin and member role?
+Answer: Users who are assigned the ‘Admin’ role will be able to access and modify the organization information, invite users, view usage, etc. whereas users assigned the ‘Member’ role will not be able to access any Organization settings.
+
+Question: When a user is removed from the organization, will they still be able to access the stacks shared with/created by them?
+Answer: No, after a user has been removed from the organization, he/she will not able to access the stacks shared/created by them in the organization.
+
+Question: What is Contentstack Personalize?
+Answer: Contentstack Personalize is a marketing solution that empowers organizations to effectively tailor their content, enabling them to tell the right stories to the right people at the right time. This sophisticated engine offers segmentation and A/B testing capabilities to streamline content optimization, ensuring maximum engagement and impact.
+
+Question: What is Segmentation and A/B Testing?
+Answer: Segmentation
+: Users can easily segment their visitors into audiences based on various criteria, such as location, interests, purchase history, and more. Then segmented experiences use these audiences to target specific content to the desired audiences.
+A/B Testing
+: The A/B testing experiences allow users to experiment with different variants of their content to optimize performance. Users can create the variants, distribute them, and measure conversion metrics to determine which performs best.
+
+Question: What are the possible use cases for Personalize?
+Answer: Here are some possible use cases for Contentstack Personalize:
+Visitor Authentication:
+Showing different cards based on whether the visitor is an authenticated user or not.
+Product Promotion
+: Displaying promotional material for a product an existing customer has not purchased before.
+Geolocation
+: Showing different shipping options via cards depending on which is offered by the visitor's current selected store.
+A/B Testing
+: Testing different layouts, text, graphics, etc. for a campaign landing page to measure lead generation effectiveness.
+Device Recognition
+: Changing graphics displayed based on the device used by the visitor (mobile vs. web).
+UTM Parameters
+: Personalizing content for marketing campaigns to identify specific channels and content that drive the most engagement.
+
+Question: What are Variants?
+Answer: Content editors need a straightforward way to manage the nuanced and tailored experiences Personalize is designed to enable. Variants lays a foundational framework for Personalize to drive testing and personalization for different needs and use cases – ensuring you deliver the right story to the right audience at the right time. Variants enable content editors to intuitively access and edit all content variants directly within the entry editor of the CMS, minimizing content duplication and maximizing content reuse.
+
+Question: Who can use CMS Variants?
+Answer: For GA, Personalize customers will have the Variants feature enabled in their CMS by default.
+
+Question: How does Personalize track users with cookie/tracking blockers or VPNs?
+Answer: Personalize relies on our customers' data collection, so if they can track their visitors (as we can), then you can use Personalize. We drop a first-party cookie. So if the user clears their cookies and our customers are not specifically identifying the visitors, their audience will be reset to the base entry. If they fully block cookies, then they’ll only get base content, but they will always get something.
+
+Question: Are there any dependencies before I can use Variants?
+Answer: Variants are available out of the box for customers using our headless CMS and leveraging Personalize as well. Customers using our headless CMS but leveraging another personalization tool will still be able to leverage Variants with additional setup involved.
+
+Question: Can variants be shared across multiple stacks?
+Answer: Variants are stack-specific. A Personalize project can connect to one stack at a time.
+
+Question: Can variants be personalized per locale? For all locales?
+Answer: Yes, you can create variants of a locale for all locales. Variants are per locale - a variant in one locale does not exist in another.
+
+Question: What does Personalize require on the front-end?
+Answer: One-time setup of Personalize Edge SDK snippet on the front-end. Once the snippet is in place, marketers can set up personalization experiences without developers. It’s like no-code personalization.
+
+Question: Can I add/remove items from a Release after deployment?
+Answer: Yes, you can add or remove items from a release even after deployment using the unlock feature. Once you
+unlock
+the release, you can modify its contents as needed. After making your changes, you can
+lock
+the release again.
+
+Question: What items can I update with the Update release items to their latest versions option?
+Answer: You can update all entries and assets within a release to their latest versions using the
+Update release items to their latest versions
+option.
+
+Question: I am trying to add an entry to a release, but I get a warning message about adding entries to an older release. What does this mean?
+Answer: This warning indicates you're trying to add an entry to a release that was created before the bulk add to release feature was enabled. To resolve this,
+clone
+the older release into a new one that supports
+nested references
+, and then add the entries to the cloned release.
+
+Question: Can I update the items of a release if the release is locked?
+Answer: No, you cannot update the items of a locked release. However, you can
+unlock
+a release and update the items to their latest version.
+
+Question: Can I update an unlocalized release entry that gets localized later?
+Answer: Yes, you can
+update release items to their latest versions
+to update the unlocalized release entry to its localized version.
+
+Question: What happens to a release update if my release contains an entry with an in-progress latest version?
+Answer: If you update the release to their latest versions, all the entries within the release will get updated to their latest versions. However, if an entry is in an in-progress state, it will return an error during the publishing operation.
+
+Question: Can I update specific items of a release to their latest versions individually?
+Answer: No, you cannot update specific release items to their latest versions individually. You need to create a separate release to update specific items individually.
+
+Question: How do I view the history of changes made to a release?
+Answer: In
+Stack Bulk Task Queue
+, you will see the items added to the release. Details such as items removed from release and who locked or unlocked the releases are not visible in the Stack Bulk Task Queue.
+
+Question: Can I duplicate a release?
+Answer: Yes, you can duplicate a release by
+cloning a release
+. This will create a new release with the same content as the original release.
+
+Question: How do I know if a release has been successfully deployed?
+Answer: Release status will be changed to deployed once the deployment is completed. You can also check the deployment status in
+Publish Queue
+.
+
+Question: How do I invite new users when IdP Role Mapping is enabled for my SSO-enabled organization?
+Answer: To add new IdP users to your SSO enabled organization, just add them to any of your IdP group or role (in your IdP settings) that is mapped with Contentstack roles. They can then directly login to Contentstack (via SSO) with the corresponding permissions.
+If you want to provide a different set of permissions to some
+users
+, create a new group/role in your IdP, and add users to this group. Subsequently, add the
+mapping
+for this group in Contentstack SSO user settings.
+To invite external users, disable
+Strict Mode
+and invite them as usual from Contentstack from
+Organization Settings
+. Remember to select the
+Allow login without SSO
+checkbox.
+
+Question: If SSO is already enabled for my organization, does enabling IdP Role Mapping cause any change?
+Answer: Yes. Only the
+roles
+received from your IdP for the users will be honored. This means that, on enabling IdP Role Mapping, the existing roles assigned to the users will be overridden by the roles assigned to IdP groups. This, however, is not applicable for external users (i.e., users who log in without
+SSO
+to your SSO-enabled organization).
+Please note that there is no way to revert the changes that were overridden by your IdP roles. The roles that were assigned to users prior to enabling IdP Role Mapping are erased.
+
+Question: What happens to user roles when I disable IdP Role Mapping for my SSO-enabled organization?
+Answer: If you disable IdP Role Mapping, Contentstack no longer honors roles (and permissions) returned by your IdP. There are, however, no changes to the existing permissions of the users in Contentstack.
+Users
+continue to maintain the permissions that they had.
+However, subsequent to disabling
+IdP Role Mapping
+, role management can be done only through Contentsatack’s Users and Roles settings.
+
+Question: Is the title of a saved search editable?
+Answer: Yes, you can give any title to your saved search. Refer to our
+Use Saved View
+document for more information.
+
+Question: Can I modify the conditions/queries in a saved search?
+Answer: Yes. Once you save a search, you can only modify its Title and the conditions/queries that you have defined. Refer to our
+Use Saved View
+document for more information.
+
+Question: Is there a way to search from any module in a stack?
+Answer: Yes, you can use
+Quick Search
+to search for entries and assets from any location within your stack.
+
+Question: Can I share my saved views with other users?
+Answer: Yes, you can share your saved views with other collaborators within the stack.
+However, if you share a view, collaborators can access it and save it as a view if they wish to keep it. Refer to
+Use Saved Views
+document for more information.
+
+Question: Is there a limit to the number of saved views I can create?
+Answer: You can save a maximum of
+500
+views, including both entries and assets.
+
+Question: What are Popular Views and My Views in Contentstack?
+Answer: Popular Views
+are predefined sets of filters and settings tailored for common search scenarios, such as “All Entries” or “Not Published.”
+My Views
+are custom views that you save based on your own search settings, which can be accessed later for repeated use.
+
+Question: Can I update Popular Views?
+Answer: No,
+Popular Views
+are predefined and cannot be changed or updated. However, you can make the necessary modifications to the results of the popular views and save it as a new view.
+
+Question: How can I customize the search filters I see on the left panel?
+Answer: To customize the displayed filters, click on the Manage Filters button at the bottom of the left panel. Select the desired filters and rearrange them according to your needs. Refer to our
+Use Filters
+document for more information.
+
+Question: Can I nest conditions/queries in an advanced search?
+Answer: Yes, you can. Refer to our
+Advanced Search
+document for more information.
+
+Question: Can I edit my views?
+Answer: Yes, you can edit the title of your saved view and update an existing view with additional queries. To know more about modifying views, refer to our
+Use Saved Views
+document.
+
+Question: Can I search for Custom Fields through the app's search?
+Answer: Yes, you can search for Custom Fields by selecting the Specific field from the dropdown in the search bar. Refer to our
+Basic Search
+document for more information.
+
+Question: How secure is my content saved in Contentstack?
+Answer: Contentstack accounts are password protected. To make them more secure, we have
+two-factor authentication
+that lets you add an extra layer of security.
+
+Question: I forgot my account password. What should I do?
+Answer: In case you forget your password, you can reset it again by performing the steps given below:
+Click the
+Forgot Password?
+link on the login page.
+On the
+Forgot your Password?
+page, enter your email ID and click the
+Send Instructions
+button. You will receive an email containing the password reset page link.
+On the
+Reset Password
+page, enter the new password and click the
+Reset Password
+button.
+Now you can log into your account using the new password.
+
+Question: How does a password reset work?
+Answer: To reset your Contentstack user account password, log in to your
+Contentstack account
+, and perform the following steps
+Click your profile located at the top-right corner of the page, and select
+Security
+. This opens the
+Account Settings
+page.
+Under the
+Change Password
+section, enter your old password and new password, confirm it, and click
+Update
+to update your password
+Now you can log in to your account using new password.
+In case you forget your password, please contact our
+Support
+team.
+
+Question: I have enabled Two-factor Authentication (2FA) for my account. And I need to change my registered phone number associated with my account. How can I do this?
+Answer: To change the registered phone number associated with your Contentstack account, log in to your
+Contentstack account
+using existing phone number, and perform the following steps:
+Click your profile located at the top-right corner of the page, and select
+Security
+. This opens the
+Account Settings
+page.
+Under the
+Two-factor Authentication
+section, click the
+Reset your phone number
+link.
+Enter the new phone number and click
+Reset
+.
+Select a method to verify your phone number either using the Authy app or via text message, and perform the verification process as performed while enabling two-factor authentication.
+
+Question: I have enabled two-factor authentication (2FA) for my account, but my number has changed. Looks like I am locked out of my account. What should I do?
+Answer: If you do not have access to the phone number that was used for 2FA registration, you will need to contact our
+Support
+team for further assistance.
+
+Question: What are the measures taken for disaster recovery?
+Answer: For any enterprise, data is of utmost importance and it's crucial to protect it. So, it's very important to have a proper disaster recovery plan in place to cover all contingencies. To do so, it's imperative that we set in place a system that will considerably reduce the damages caused by a fire, theft, flooding, etc, by backing up our data at appropriate locations.
+Apart from natural disasters, backing up files can protect your content against accidental loss of user data, database corruption, and hardware failures. It’s our job as service providers to make sure that backups are performed and in a secure location.
+We have taken this into account and have come up with the required measures to create the right plan for you.
+Let’s see them in detail.
+Region and Availability Zones
+We leverage AWS to deploy Contentstack in multiple availability zones so that if one of the instances in an availability zone fails, the requests will be routed to one of the healthy instances. If an availability zone fails altogether, the requests will be routed to the working availability zones. Contentstack won't face any downtime.
+Highly Available Architecture
+Contentstack has a network architecture that is designed for maximum reliability and uptime, and offers up to 99.95% Service Level Agreement (SLA) for its services, just as promised. The infrastructure consisting of highly-available, redundant number of data centers ensures minimum service interruption due to natural disasters, hardware failures, or other incidents.
+CDN and Caching
+Our highly efficient
+CDN
+ensures faster delivery of content irrespective of the destination with the help of nodes that are spread all around the world. Also, it allows caching – keeping copies of content that were requested earlier thus making it available for future requests.
+Data is constantly backed up
+We use a Cloud-based backup solution to backup our database. For every request made, your data is constantly backed up.
+
+Question: How do I enable SSO for an organization?
+Answer: To enable
+SSO
+, you need to meet these two conditions:
+You must be the
+owner
+of the organization
+SSO must be a part of your Contentstack plan
+If you meet these two conditions, you can set up SSO for your organization by following the
+Set up SSO
+guide.
+
+Question: How can a user, who always logged in to his/her SSO-enabled Contentstack account via SSO (and does not have normal login credentials), access the same organization after SSO has been disabled for the organization?
+Answer: When a user is included in an SSO-enabled Organization, he/she accesses the Organization through SSO using their IdP credentials instead of their Contentstack credentials (which they might not have created). If, later on, SSO is disabled for the Organization, the user will not be able to log in to Contentstack through IdP. However, the user is still part of the Organization.
+To access the same organization, the user will have to perform the following steps:
+Open Contentstack’s
+login page
+and click the
+Forgot Password?
+link.
+Enter the email address and click
+SEND INSTRUCTIONS
+.
+Now, the user will receive the password reset instructions on the email address. The user needs to follow the instruction and login to their Contentstack account.
+
+Question: If the Identity Provider (IdP) experiences a system failure, how can we make changes to our content?
+Answer: An organization
+owner
+can always use his Contentstack credentials to
+log in
+to Contentstack and make relevant changes, irrespective of whether SSO has been enabled or not.
+If the IdP experiences system fails, then the owner can perform the following steps:
+Log in to the Contentstack account.
+Go to
+Organization settings
+page and open the
+Single Sign-On
+tab, go to
+User Management
+, disable
+Strict Mode
+, and grant access to the required user(s) by checking the
+Allow Access without SSO
+option.
+These users will now be able to access the organization using their Contentstack credentials, instead of through SSO (IdP credentials).
+However, if the user does not have a Contentstack account, he/she will receive an email with the account setup instructions to create an account in Contentstack. Post setting up their account, they will be able to access the Organization content.
+
+Question: As a user, how do I sign in to an SSO-enabled organization in Contentstack?
+Answer: To sign in to an SSO-enabled organization in Contentstack, perform the following steps:
+Open the
+login page
+of Contentstack and click the
+Log in via SSO
+button.
+Then, enter your organization
+SSO Name
+, and click on
+Log in via SSO
+button. This will open your corporate IdP login page.
+Note
+: You must have received the SSO name in your stack or organization invitation email. If you do not know your organization SSO Name, contact your organization
+owner
+or
+admin
+.
+Finally, sign in to your Contentstack account by entering your IdP login details.
+
+Question: As an owner/admin, how do I invite users that are not in my corporate IdP to my SSO-enabled organization?
+Answer: To invite users that are not in your IdP, perform the following steps:
+Log in to your
+Contentstack account
+, go to the
+Organization Settings
+page and click on
+Single Sign-On
+tab, open the
+User Management
+tab, and disable the
+Strict Mode
+.
+Then, go to the
+Users
+tab located at the header, and
+invite users
+.
+While inviting, select the
+Allow Access without SSO
+checkbox. This will allow the invited user to access the SSO-enabled organization through Contentstack credentials.
+
+Question: Will I need to resend an invite to my existing organization users if I enable SSO?
+Answer: No. You do not have to send an invitation again since the existing users continue to remain part of the organization, even after SSO is enabled.
+Nothing changes for the existing users, except that they are required to sign in using SSO, instead of normal Contentstack username/password login. However, if any existing user is not part of your identity provider, you may have to disable
+Strict Mode
+and update the user in Contentstack by assigning permission to
+Allow Access Without SSO.
+
+Question: Why do I need SAML encryption?
+Answer: Adding
+encryption to SAML attributes
+adds another layer of security, ensuring that personal or corporate information is not compromised.
+
+Question: Which attributes are encrypted?
+Answer: Your SAML attributes such as email, first name, and last name that are mapped with your IdP are encrypted. Learn more about
+SAML encryption.
+
+Question: How do I enable SAML encryption?
+Answer: You need to enable SAML encryption in Contentstack and your IdP settings.
+To enable SAML encryption in Contentstack, follow the steps given below:
+Log in to your
+Contentstack account
+, go to the
+Organization Settings
+page, and click on the
+Single Sign-On
+tab.
+Click on the
+IdP Configuration
+tab.
+Check the
+Enable SAML Encryption
+toggle, and click on
+Save
+.
+Provide the following details in your IdP to enable SAML encryption:
+In the
+Single Sign-On Url
+field, provide the ACS URL that was generated for your organization in Contentstack.
+Use Contentstack’s Entity ID (generated in Step 1) in your IdP in
+Audience URI
+,
+SP Entity ID
+,
+SAML Issuer ID
+, or fields similar to these.
+In the
+NameID Format
+, select or enter
+Email Address
+. This defines the parameter that your IdP should use to identify Contentstack users.
+[Optional Step]
+If you want to encrypt your SAML attributes, you need to enable SAML encryption in your IdP and upload the
+Contentstack Public Certificate
+.
+
+Question: Where can I find the API key and Access Token of my stack?
+Answer: To get the API key of your stack, log in to your
+Contentstack account
+, and perform the following steps:
+Go to your
+stack
+, click on the “Settings” icon on the left navigation panel, and select
+Stack
+.
+Scroll down, under
+API Credentials
+, you will get the API key of your stack.
+Note
+: We have stopped supporting Access Tokens for all stacks created after December 16, 2020. For stacks created after this date, the Access Token will no longer be generated. We recommend using
+Delivery Tokens
+to access published content and
+Management Tokens
+for making content management API requests.
+
+Question: Can I reset the API key and Access Token of my stack?
+Answer: The API key of the stack remains constant and you cannot change it.
+Note
+: We have stopped supporting Access Token for all stacks created after December 16, 2020. For stacks created after this date, the Access Token will no longer be generated. We strongly recommend switching to
+Delivery Tokens
+for Content Delivery API requests and
+Management Tokens
+for Content Management API requests.
+
+Question: Can I share a stack with other users?
+Answer: Yes
+. To do this, perform the following steps:
+Go to the
+stack
+where you want to add a user.
+Click the “Settings” icon on the left navigation panel.
+Select
+Users & Roles
+.
+Click on the
+Invite User
+button located at the top right corner of the page.
+The
+Invite User
+forms opens up where you can add the following details:
+Email
+: Enter the email address(es) of the user(s) you want to invite and share the stack with
+Roles
+: Select the role(s) that you want to assign to the new user
+Message
+(optional): Enter a short message that goes along with the invitation to the user
+Click on
+Invite
+.
+
+Question: Can I un-share a stack with existing users?
+Answer: Yes
+, you can remove an existing user from a
+stack
+if you have required permissions.
+Note
+: The
+stack owner
+has the right to remove any user from a stack. But, an
+admin
+or
+developer
+can only remove a user whom they have added.
+To remove a user, log in to your
+Contentstack account
+, and perform the following steps:
+Go to the
+stack
+from which you want to remove the user.
+Click the “Settings” icon on the left navigation panel.
+Select
+Users & Roles
+.
+Click the ellipses under
+Actions
+column beside the user you want to delete, click
+Remove
+.
+Confirm the
+Remove
+action to permanently remove the user from the stack.
+
+Question: Can I transfer the ownership of my stack to someone else?
+Answer: Yes
+, you can. To do so, perform the following steps:
+Go to your
+stack
+, click the “Settings” icon on the left navigation panel
+Select
+Stack
+.
+Click
+Transfer Ownership
+from top right.
+Enter the email address of the person to whom you want to transfer the stack’s ownership.
+Note
+: Make sure the intended user is already a Contentstack user.
+Click
+Transfer Ownership
+to confirm the transfer.
+Note
+: Only the
+owner
+can transfer the ownership of their stack to other Contentstack users.
+
+Question: I am unable to create content types in my stack. What could be the issue?
+Answer: This could be because you do not have the required permissions to create
+content types
+in your
+stack
+. The
+owner
+of the stack defines the
+roles
+and permissions of a user while sharing the stack with the user. Kindly contact the stack owner to enable this for your account.
+
+Question: How to delete a stack?
+Answer: Note
+: Only the Organization owner or Stack creator/owner has the right to delete a stack.
+To delete a
+stack
+, log in to your
+Contentstack account
+, and perform the following steps:
+Open the stack that you want to delete.
+Click the “Settings” icon on the left navigation panel.
+Select
+Stack
+.
+Click on
+Delete Stack
+.
+Confirm the
+Delete
+action to delete your stack permanently.
+Alternatively, if you are an
+Organization Owner
+, you can delete a stack through the
+Organizations Settings
+page by following the steps mentioned in the
+Delete a stack
+section.
+
+Question: Whom do I contact if I need help?
+Answer: For any help related to Contentstack, please contact us either by using the in-product chatbox or by emailing the
+Support
+team.
+
+Question: How can I chat with the Support team?
+Answer: Get in touch with us through our in-app chat box.
+To do this, log in to your
+Contentstack account
+and click on the Help (
+Question Mark ‘?’
+) icon on the top right corner of the page.
+Click on
+Chat with Support
+to initiate a conversation with our Support team.
+You can also reach out to us at
+support@contentstack.com
+via email.
+If you are using our app's
+classic UI
+then, log in to your
+Contentstack account
+and click on the Help (
+Question Mark ‘?’
+) icon on the top right corner of the page.
+Click on
+Chat with Support
+to initiate a conversation with our Support team.
+You can also reach out to us at
+support@contentstack.com
+via email.
+
+Question: I have found a bug. What should I do?
+Answer: If you find any bug in our product or have any suggestions, please contact our support team via the in-product chatbox or email us at
+support@contentstack.com
+.
+
+Question: How can we get a copy of our content backup for disaster recovery?
+Answer: We use cloud-based backup solutions for backing up our database.
+Our databases are stored in multiple regions. As a result, in case if one region is affected by any disaster, the data stored in other regions serve as backups.
+If you wish to create content backups at your end, you can use our
+Webhooks
+. Webhooks trigger whenever an event happens (such as entry created, content type deleted). The data is then sent to an external URL that you specify in webhooks.
+
+Question: How do I enable SCIM for an organization?
+Answer: Here’s a
+step-by-step guide
+that explains how to enable SCIM for your Contentstack organization and manage user provisioning through OneLogin as your identity provider (IdP).
+To enable SCIM, however, the following things need to be in place:
+SCIM must be part of your Contentstack plan
+You must either be an
+owner
+or
+admin
+of the organization
+
+Question: Which Identity Providers (IdPs) does Contentstack support?
+Answer: Currently, we support SCIM for
+OneLogin
+,
+Microsoft Azure AD
+, and
+Okta Native
+apps. We plan to add support for other IdPs soon.
+
+Question: How to edit details of a user via SCIM?
+Answer: The endpoint to edit user details is not supported. Considering that users can be members of more than one organization in Contentstack, we do not support an organization to edit user details such as their name or email address.
+However, to change users’ organization role, you can use the Contentstack app and follow the steps mentioned in this
+Change Organization Role of Existing Users
+guide.
+
+Question: Which version of the SCIM protocol does Contentstack support
+Answer: Contentstack supports SCIM
+2.0
+.
+
+Question: Do users get deleted from the Contentstack account after they are deprovisioned from an organization via IdP?
+Answer: If you deprovision users via IdP, they will no longer be a part of the respective Contentstack organization. However, those users will still have access to the Contentstack account.
+
+Question: If a user is added to multiple groups via SCIM, then what would be the net permission to the user?
+Answer: If a user belongs to multiple groups, he/she will get the highest order of permission on the organization and stack(s). For example, user1 belongs to group1 and group2, and these groups have the following set of permissions:
+Group1:
+Organization Admin
+“
+Developer
+” role in all stacks
+Group2:
+Organization Member
+“
+Content manager
+” role in all stacks
+In this case, user1 will be the admin of the organization and have the “Developer” and "Content manager" roles in all the stacks.
+
+Question: Is the taxonomy feature a global or branch-specific module?
+Answer: The taxonomy feature is a
+global module
+that will be available across all branches in a stack.
+
+Question: What is the difference between Taxonomy and Terms?
+Answer: Taxonomy is the higher-level module that contains terms which are the main pieces that help classify entries. For example, if you want to classify your entries based on regions, you can create a taxonomy called Regions and have terms within it such as North America, Europe, Australia, India, etc.
+Learn more about
+creating taxonomy
+and
+creating terms
+.
+
+Question: How does this feature affect the other modules in Contentstack?
+Answer: The modules currently available in Contentstack will not be affected. You can create taxonomies as per your requirements, and simply
+add them to the content types
+, and
+classify the entries by adding terms
+.
+
+Question: What happens if I delete a taxonomy?
+Answer: If you
+delete a taxonomy
+, its association with all the content types to which it was added is lost. Also, the terms within the taxonomy also lose their association to the entries.
+Note
+: Once deleted, you can
+restore a taxonomy
+within 14 days.
+
+Question: What happens if I delete a few terms within a taxonomy?
+Answer: If you
+delete terms
+within a taxonomy, all its child terms are deleted as well. As a result, the entries to which these terms were linked will lose their connection.
+Note
+: Once deleted, you can
+restore a term
+within 14 days.
+
+Question: What are terms and how to work with them?
+Answer: Terms serve as fundamental elements for categorizing entries. You can incorporate multiple terms within a taxonomy, organizing them in a hierarchical structure. Subsequently, you can associate these terms with entries.
+Learn more about
+creating terms
+and
+adding terms to entries
+.
+
+Question: Is it possible to reposition terms within a taxonomy?
+Answer: Certainly, you have the flexibility to rearrange and shift terms within a taxonomy as needed, allowing for a more organized and structured classification.
+Learn more about
+moving terms
+.
+
+Question: How do I work with taxonomy using the Content Management API?
+Answer: You can retrieve information for all or a specific taxonomy. You can also create and delete taxonomies using the API requests.
+Refer to the
+Taxonomy collection
+in our Content Management API documentation for more information.
+
+Question: How do I work with taxonomy using the Content Delivery API?
+Answer: You can retrieve information for all or a specific taxonomy via the API requests.
+Refer to the
+Taxonomy collection
+in our Content Delivery API documentation for more information.
+
+Question: Are there changes to any existing requests in the Content Management API?
+Answer: Yes, we have introduced the following enhancements to the Content Management API requests:
+Create a content type with taxonomy
+Create an entry with taxonomy
+
+Question: What is Timeline?
+Answer: Timeline
+is a feature that allows content managers to visualize how their website will appear once scheduled updates are made live. It provides a comprehensive view of upcoming content transformations.
+
+Question: How does Timeline work?
+Answer: Timeline works by enabling users to set specific dates and times for content updates. It then allows them to preview these changes in a simulated environment, ensuring everything looks as intended before going live.
+Learn more about
+Preview Content across a Timeline
+.
+
+Question: Can I preview content without scheduling it first?
+Answer: Yes, Timeline allows you to check the appearance of content editions without the need to schedule them initially. This flexibility helps in refining content before committing to a publishing schedule.
+Learn more about
+Previewing Entries
+.
+
+Question: Is Timeline compatible with different types of content updates?
+Answer: Yes, Timeline supports various types of content updates, including text changes, image updates, layout adjustments, and more. It offers a holistic preview experience for all scheduled changes.
+
+Question: How can Timeline enhance my workflow?
+Answer: By using Timeline, you can streamline your workflow by ensuring that updates align with your site's design and user experience goals. It also helps in coordinating content releases and maintaining consistency across scheduled changes.
+Learn more about
+Preview Content across a Timeline
+.
+
+Question: What is the difference between Timeline and the Release Preview app in Contentstack?
+Answer: The key differences between Timeline and the Release Preview app in Contentstack lie in their implementation, capabilities, and integration within the Contentstack ecosystem.
+Implementation
+:
+Release Preview App
+: Visualizes future changes before a scheduled release, requires marketplace integration.
+Timeline
+: Core feature with backend support for a seamless experience.
+Capabilities
+:
+Release Preview App
+: Limited to specific release dates.
+Timeline
+: Preview or compare the website for any future date.
+Integration
+:
+Release Preview App
+: Requires separate installation and setup.
+Timeline
+: Built-in, no extra setup needed.
+Timeline offers better functionality, flexibility, and integration than the Release Preview App.
+Note
+: The Release Preview app is no longer supported and has been removed from the Contentstack marketplace.
+
+Question: Why choose Timeline over the Release Preview app?
+Answer: Core Integration
+: No extra installations required.
+Backend Support
+: Smoother and more reliable.
+Enhanced Flexibility
+: Preview any future date.
+Comprehensive Comparison
+: Compare across different future releases/scheduled publishes.
+Future-Proof
+: Regular updates and improvements.
+Note
+: The Release Preview app is no longer supported and has been removed from the Contentstack marketplace.
+
+Question: Can Timeline handle updates across different environments (e.g., development, staging, production)?
+Answer: Yes, Timeline supports previewing content across various environments, allowing you to visualize how updates will appear before they go live.
+
+Question: Can Timeline be used for previewing localized content in different languages?
+Answer: Yes, Timeline supports previewing content in multiple languages, helping you ensure consistency and accuracy across localized versions of your website.
+
+Question: I want other users to add and edit content for my website. Is it possible?
+Answer: Yes, you can
+add users
+to add and edit content for your website. For that, you need to share the relevant stack with other users.
+
+Question: I want to add new users to the stack but cannot see anything in the “Settings” section. How do I do this?
+Answer: If you do not see the
+Users & Roles
+option under "Settings,” it means you do not have permission to add new users to your
+stack
+. Please contact the stack
+owner
+to add users or to grant you the necessary permissions.
+
+Question: How many users can I add per stack?
+Answer: You can add an unlimited number of users to a
+stack
+.
+
+Question: Can I control access to content for users and groups?
+Answer: Yes, you can control access to content for users and groups by assigning them specific roles. We recommend you to go through the
+Roles
+section in order to achieve this functionality.
+
+Question: ​Are all the roles editable?
+Answer: No. The
+Owner
+and the
+Admin
+roles are not editable. Other roles are editable.
+
+Question: ​Can a developer remove all users from a stack?
+Answer: No, the
+developer
+can remove only those users whom he/she has invited to the stack.
+
+Question: ​Can the admin of a stack delete the stack?
+Answer: Only the owner of the stack has the right to
+delete a stack
+.
+
+Question: ​What are the benefits of creating a Custom role?
+Answer: The
+Custom Role
+gives you the provision to apply permissions at
+entry
+,
+field
+, and
+asset
+levels.
+
+Question: ​Can a stack have multiple owners?
+Answer: No, each stack can have only one Owner, who has complete rights to the content and settings of a stack. In addition to that, the Owner has the right to delete a stack as well as
+transfer the ownership
+of the stack to another user.
+
+Question: ​Is there a difference between the “Admin” and “Developer” roles?
+Answer: Yes, both the roles are different and the differences that are mentioned in the
+Stack Admin vs Stack Developer
+section.
+
+Question: Who can add users to a stack?
+Answer: Only the
+Owner
+,
+Admin
+, and users assigned the “
+Developer
+” role can add users to a stack.
+
+Question: Can a user with a Custom Role view the settings of a stack?
+Answer: No, users with
+Custom role
+and
+Content Manager
+role cannot view the
+Stack
+settings.
+
+Question: ​Are there any limitations when creating roles?
+Answer: Yes, there are certain limitations in Roles. They are as follows:
+Title
+: The title of a role should be between
+1
+and
+160
+characters.
+Description
+: The description of a role should not exceed
+320
+characters.
+Permissions Limitations
+: When creating a custom role, you cannot add individual components beyond certain limits in permissions. The maximum allowed limit of components (Content Types, Entries, Assets, Locales, Environments) within the permissions of a custom role is
+100
+.
+
+Question: What is Visual Builder in Contentstack?
+Answer: Visual Builder is an intuitive feature that allows content creators to edit, manage, and preview web pages in real time. It provides an immersive editing experience where you can modify content directly on the preview of your website without needing technical expertise.
+Learn more about
+Visual Builder
+.
+
+Question: Can I edit my page content directly in Visual Builder?
+Answer: Yes, Visual Builder allows you to edit content inline. You can modify text, images, and other components of your web page directly on the visual canvas. For advanced fields, you can use the
+Form
+panel to edit content in a structured format, with real-time preview of your changes.
+Learn more about
+editing pages
+.
+
+Question: Can I rearrange components on my page using Visual Builder?
+Answer: Yes, you can rearrange modular blocks and instances of multiple fields within the page layout using the up/down arrows. You can also rearrange groups or elements within instances using the left/right arrows.
+Learn more about
+editing pages
+.
+
+Question: How do I set up Visual Builder?
+Answer: To set up Visual Builder, ensure that your organization has the
+Live Preview
+and
+Visual Builder
+plans enabled. Additionally, you need to have a configured live preview setup.
+Learn more about
+setting up Visual Builder
+.
+
+Question: What is the Form panel used for in Visual Builder?
+Answer: The
+Form
+panel provides access to the entry editor alongside the website preview. It is the quickest way to modify both the content and layout of your page while viewing the changes in real time.
+Learn more about
+Form
+.
+
+Question: How do I deploy or publish changes made in Visual Builder?
+Answer: Once you have made your changes in Visual Builder, click
+Save
+to save your edits. Then, click the
+Deploy
+button to see all the modified entries, where you can choose to bulk publish them at once.
+Learn more about
+deploying a page
+.
+
+Question: Can I collaborate with my team in Visual Builder?
+Answer: Yes, the
+Discussions
+panel allows team members to leave comments and feedback directly on any fields or components within a page. You can also view active discussions, resolved feedback, and the timeline for all discussions across web pages.
+Learn more about
+Discussions
+.
+
+Question: How does the Audiences feature work?
+Answer: The
+Audiences
+feature in Visual Builder allows you to preview personalized content by simulating how it will appear to different audience segments. Using specific filters, you can preview and customize the page for a targeted set of users, ensuring tailored content reaches the right audience.
+Learn more about
+Audiences
+.
+
+Question: What is the difference between Visual Builder and the traditional entry editor?
+Answer: Visual Builder offers a WYSIWYG (What You See Is What You Get) interface, enabling you to edit content directly on the canvas of your web page. This allows for a more intuitive and immersive experience, as you can see how your changes will look in real time while editing the layout and content together.
+In contrast, the traditional entry editor focuses on editing individual fields of entries in a structured form view. It requires you to modify text, images, and other components for one entry at a time, without a live preview of the overall page. While the traditional editor is effective for detailed content management, Visual Builder provides a comprehensive view, making it easier to understand the impact of your changes as you go.
+Learn more about
+Visual Builder
+.
+
+Question: If an error occurs during a webhook POST (to a third-party service) will we receive any notifications and also is it possible to retry the operation?
+Answer: In the case where a third party services is down during a webhook POST call, you won't receive any notifications. But, users have the provision to retry the webhook operation. You can check
+webhook logs
+to view the failed requests and can retry them.
+
+Question: How do I differentiate between the webhook data received when an entry is published or unpublished directly and the webhook data received when an entry is published or unpublished via a release deployment?
+Answer: When a release is deployed, it triggers the webhooks for the individual items (entries and assets) of the release, if such webhook events are defined.
+In such cases, a
+source
+key is added to the webhook data of an event that is triggered via a release. This key contains the JSON data of the source event (
+type
+,
+title
+, and
+UID
+).
+Here's what is added to the webhook data:
+"source": {
+    "type": "release",
+    "title": "{{release_title}}",
+    "uid": "{{release_uid}}"
+},
+
+Question: For which events can I trigger a webhook in Contentstack?
+Answer: You can trigger a webhook for several events as listed in the
+Webhook Events
+article.
+
+Question: Can I filter the webhook execution details returned in the API response based on a date range?
+Answer: Yes, you can filter the webhook execution details returned in the API response based on a specific date range. To do so, pass
+from
+and
+to
+as query parameters while running the
+Get executions of a webhook
+API request. You need to provide the dates for both these parameters in ISO format.
+For instance, to specify December 8, 2017, you can provide the following value in ISO date format:
+2017-12-08T00:00:00.000Z
+
+Question: What are the authentication methods available for webhooks?
+Answer: Contentstack supports several authentication methods for webhooks including
+HTTP Basic Auth
+,
+OAuth 2.0 Client Credential
+, and
+Bearer Token
+. Each method offers a different level of security and integration flexibility to suit various use cases.
+Note
+: The
+Basic Auth
+method is available by default. To enable the
+OAuth 2.0 Client Credential
+authentication method for your organization, please contact our
+support
+team.
+
+Question: What happens if the OAuth token used by my webhook expires?
+Answer: If an OAuth token expires, the webhook should return a status code of
+4xx
+(typically
+400
+,
+401
+, or
+403
+) with specific error messages like
+invalid_request
+,
+invalid_token
+, or
+insufficient_scope
+. Contentstack will then request a new token and retry the webhook request.
+
+Question: How can I specify additional parameters for OAuth 2.0 in my webhook?
+Answer: You can specify additional parameters required by your OAuth authorization server using the
+Request Query Parameters
+field in the webhook settings. This allows you to provide context or instructions in key-value format.
+Note
+: The request query parameters will be appended to the access token URL.
+
+Question: What is the minimum and maximum number of Workflow stages that can be created?
+Answer: You can create a minimum of
+2
+and a maximum of
+20
+Workflow stages.
+
+Question: Can I add more than one workflow for a content type?
+Answer: Yes. You can add more than one workflow for a content type, as long as each
+workflow
+is associated with a distinct branch.
+
+Question: Why cannot I see any stages to select a specific stage in the “Next available stages” section?
+Answer: First, you need to add all the
+stages
+at once, and later on you can browse through
+Stage transition rules
+to select a specific stage under the
+Next available stages
+section.
+
+Question: Can I add more than one publish rule for a content type?
+Answer: No, you cannot add more than one
+publish rule
+for a
+content type
+.
+
+Question: Can workflows be used for automated publishing?
+Answer: Yes, workflows can be integrated with publish rules for automated publishing. You can set up rules to automatically publish content when it reaches certain stages of the workflow. For more information, refer to the
+publish rules
+documentation.
+
+Question: Can workflows be cloned or copied?
+Answer: Currently, Contentstack does not support cloning or copying workflows directly. You need to manually
+create a new workflow
+and replicate the steps from the existing one.

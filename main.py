@@ -1,8 +1,8 @@
 import streamlit as st
 import os
 
-from llm import error_samples, get_ai_response
-
+from src.llm import get_ai_response
+from src.error_sample import error_samples
 
 st.title("Launch Assistant🚀")
 st.write("Share your logs.")

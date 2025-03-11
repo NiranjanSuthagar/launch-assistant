@@ -4,3 +4,4 @@ ollama
 groq
 streamlit
 openai
+sentence-transformers 
